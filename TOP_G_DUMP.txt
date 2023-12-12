@@ -1,0 +1,47 @@
+im GetG leading all work
+
+i'm getE reading '+' and '-' op pos 0
+	pidr + sin(huy)
+
+i'm getT reading '*' and '/' on pos 0
+	pidr + sin(huy)
+
+i'm getP reading '(' and ')' on pos 0
+	pidr + sin(huy)
+
+Im GetA[rgument] reading args on pos 0,
+	 string pidr + sin(huy)
+
+Im GetV reading variables on pos 0,
+	 string : pidr + sin(huy)
+
+i'm getT reading '*' and '/' on pos 6
+	 sin(huy)
+
+i'm getP reading '(' and ')' on pos 6
+	 sin(huy)
+
+Im GetA[rgument] reading args on pos 7,
+	 string sin(huy)
+
+Im GetV reading variables on pos 7,
+	 string : sin(huy)
+
+i'm getP reading '(' and ')' on pos 10
+	(huy)
+
+i'm getE reading '+' and '-' op pos 11
+	huy)
+
+i'm getT reading '*' and '/' on pos 11
+	huy)
+
+i'm getP reading '(' and ')' on pos 11
+	huy)
+
+Im GetA[rgument] reading args on pos 11,
+	 string huy)
+
+Im GetV reading variables on pos 11,
+	 string : huy)
+

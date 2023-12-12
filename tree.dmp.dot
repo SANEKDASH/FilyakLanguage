@@ -1,0 +1,21 @@
+digraph List
+{
+	rankdir = TB;
+	graph [bgcolor = "black"]
+	node[color ="black", fontsize=14, shape = Mrecord];
+	edge[color = "red", fontcolor = "blue",fontsize = 12];
+
+
+node00B84B80 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "data: - | {type : operator | op_code : 1} | {parent: 00000000 | pointer: 00B84B80 | left: 00B84A90 | right: 00B84B40} "]
+node00B84A90 [style = filled, fillcolor = "pink", shape = Mrecord, label = "data: 0 | type : variable | {parent: 00B84B80 | pointer: 00B84A90 | left: 00000000 | right: 00000000} "]
+node00B84B40 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "data: cos | {type : operator | op_code : 5} | {parent: 00B84B80 | pointer: 00B84B40 | left: 00000000 | right: 00B84B00} "]
+node00B84B00 [style = filled, fillcolor = "pink", shape = Mrecord, label = "data: 1 | type : variable | {parent: 00B84B40 | pointer: 00B84B00 | left: 00000000 | right: 00000000} "]
+node00B84B80->node00B84A90
+node00B84B80->node00B84B40
+node00B84A90->node00B84B80[color = "yellow"]
+node00B84B40->node00B84B80[color = "yellow"]
+node00B84B40->node00B84B00
+node00B84B00->node00B84B40[color = "yellow"]
+
+
+}
