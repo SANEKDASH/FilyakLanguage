@@ -2,7 +2,7 @@
 #define TREE_DUMP_HEADER
 
 #include "trees.h"
-#include "Frontend/parse.h"
+#include "../Frontend/parse.h"
 
 #ifdef DEBUG
 #define GRAPH_DUMP_TREE(tree) GraphDumpTree(tree, __FILE__, __func__, __LINE__)

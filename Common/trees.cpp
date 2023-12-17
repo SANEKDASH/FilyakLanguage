@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "debug/color_print.h"
-#include "debug/debug.h"
-#include "TextParse/text_parse.h"
+#include "../debug/color_print.h"
+#include "../debug/debug.h"
+#include "../TextParse/text_parse.h"
 #include "trees.h"
 #include "tree_dump.h"
 #include "NameTable.h"
@@ -12,8 +12,6 @@
 static const char *kTreeSaveFileName = "tree_save.txt";
 
 static const int kPoisonVal = 0xBADBABA;
-
-static const char *kPreCtored = "*";
 
 static TreeNode* CreateNodeFromText(Variables     *vars,
                                     Text          *text,
@@ -176,6 +174,10 @@ TreeNode *NodeCtor(TreeNode         *parent_node,
     {
         node->data.const_val = data;
     }
+    else if (type == kEndOfLine)
+    {
+        node->data.line_number = data;
+    }
     else
     {
         printf("NodeCtor() unknown type %d\n", type);
@@ -268,7 +270,7 @@ TreeErrs_t ReadLanguageElemsOutOfFile(LanguageElems *l_elems,
 
     Text tree_text = {0};
 
-    if (ReadTextFromFile(&tree_text, file_name) != kSuccess)
+    if (ReadTextFromFile(&tree_text, file_name, SplitBufIntoWords) != kSuccess)
     {
         printf("\nReadTreeOutOfFile() failed to read text from file\n");
 
@@ -347,6 +349,17 @@ static TreeNode* CreateNodeFromText(Variables     *vars,
                                 nullptr,
                                 kIdentificator,
                                 pos);
+
+                break;
+            }
+
+            case kEndOfLine:
+            {
+                node = NodeCtor(nullptr,
+                                nullptr,
+                                nullptr,
+                                kEndOfLine,
+                                atoi(text->lines_ptr[*iterator]));
 
                 break;
             }

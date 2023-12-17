@@ -1,7 +1,7 @@
 #ifndef TREES_HEADER
 #define TREES_HEADER
 
-#include "TextParse/text_parse.h"
+#include "../TextParse/text_parse.h"
 #include "NameTable.h"
 
 typedef double VarType_t;
@@ -40,6 +40,7 @@ typedef enum
     kFailedToReadTree,
     kTreeOptimized,
     kTreeNotOptimized,
+    kNullTree,
 } TreeErrs_t;
 
 union NodeData
@@ -47,6 +48,7 @@ union NodeData
     NumType_t const_val;
     KeyCode_t key_word_code;
     size_t variable_pos;
+    size_t line_number;
 };
 
 struct TreeNode

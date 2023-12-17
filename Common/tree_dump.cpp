@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <time.h>
 
-#include "debug/debug.h"
+#include "../debug/debug.h"
 #include "trees.h"
 #include "tree_dump.h"
-#include "time.h"
 
 #define SVG
 
@@ -58,6 +58,12 @@ TreeErrs_t GraphDumpTree(Tree *tree,
                          const char *func,
                          const int line)
 {
+
+    if (tree->root == nullptr)
+    {
+        return kNullTree;
+    }
+
     FILE *dot_file = fopen("tree.dmp.dot", "w");
 
     #define LOG_PRINT(...) fprintf(dot_file, __VA_ARGS__)
@@ -68,7 +74,6 @@ TreeErrs_t GraphDumpTree(Tree *tree,
 
         return kFailedToOpenFile;
     }
-
     static char cmd_command[200] = {0};
 
     assert(dot_file);
@@ -78,7 +83,6 @@ TreeErrs_t GraphDumpTree(Tree *tree,
               "\tgraph [bgcolor = \"black\"]\n"
               "\tnode[color =\"black\", fontsize=14, shape = Mrecord];\n"
               "\tedge[color = \"red\", fontcolor = \"blue\",fontsize = 12];\n\n\n");
-
 
     LogPrintTree(tree->root, dot_file);
 
@@ -126,7 +130,7 @@ static void LogPrintTree(TreeNode *node,
         LOG_PRINT("node%p [style = filled, fillcolor = \"lightgreen\", shape = Mrecord, label = "
                   "\"data: %s | {type : operator | op_code : %d} | {parent: %p | pointer: %p | left: %p | right: %p} \"]\n",
                   node,
-                  NameTable[node->data.key_word_code].key_word,
+                  NameTable[node->data.key_word_code - 1].key_word,
                   node->data.key_word_code,
                   node->parent,
                   node,
@@ -150,6 +154,16 @@ static void LogPrintTree(TreeNode *node,
                   "\"data: %d | type : variable | {parent: %p | pointer: %p | left: %p | right: %p} \"]\n",
                   node,
                   node->data.variable_pos,
+                  node->parent,
+                  node,
+                  node->left,
+                  node->right);
+    }
+    else if (node->type == kEndOfLine)
+    {
+        LOG_PRINT("node%p [style = filled, fillcolor = \"pink\", shape = Mrecord, label = "
+                  "\"data: ; | type : END OF LINE | {parent: %p | pointer: %p | left: %p | right: %p} \"]\n",
+                  node,
                   node->parent,
                   node,
                   node->left,

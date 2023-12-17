@@ -33,9 +33,12 @@ void SkipSpaces(char **line);
 size_t GetFileSize(FILE *ptr_file);
 
 TextErrs_t ReadTextFromFile(Text       *text,
-                            const char *file_name);
+                            const char *file_name,
+                            size_t      ParseFunc(char *));
 
 size_t SplitBufIntoWords(char *buf);
+
+size_t SplitBufIntoLines(char *buf);
 
 void FillText(Text *text);
 

@@ -1,5 +1,7 @@
 #include "text_parse.h"
 
+static const int kSysCmdLen = 64;
+
 //==============================================================================
 
 void SkipSpaces(char **line)
@@ -37,8 +39,17 @@ size_t GetFileSize(FILE *ptr_file)
 //==============================================================================
 
 TextErrs_t ReadTextFromFile(Text       *text,
-                            const char *file_name)
+                            const char *file_name,
+                            size_t      ParseFunc(char *))
 {
+    /*char sys_cmd[kSysCmdLen] = {0};
+    char new_file_name[kSysCmdLen] = {0};
+
+    sprintf(new_file_name, "converted_%s", file_name);
+    sprintf(sys_cmd, "iconv -f CP1251 -t UTF-8 %s > %s", file_name, new_file_name);
+
+    system(sys_cmd);*/
+
     FILE *input_file = fopen(file_name, "rb");
 
     if (input_file == nullptr)
@@ -49,7 +60,7 @@ TextErrs_t ReadTextFromFile(Text       *text,
     }
 
     text->buf_size = GetFileSize(input_file) + 1;
-    text->buf       = (char *) calloc(text->buf_size, sizeof(char));
+    text->buf      = (char *) calloc(text->buf_size, sizeof(char));
 
     if (!text->buf)
     {
@@ -67,7 +78,7 @@ TextErrs_t ReadTextFromFile(Text       *text,
         return kReadingError;
     }
 
-    text->lines_count = SplitBufIntoWords(text->buf);
+    text->lines_count = ParseFunc(text->buf);
 
     FillText(text);
 
@@ -112,7 +123,36 @@ size_t SplitBufIntoWords(char *buf)
         }
         else
         {
-            while ((*buf) != '\n' && *buf != '\0' && *buf != '\r' && *buf != ' ' &&  *buf != '\"')
+            while ((*buf) != '\n' && *buf != '\0' && *buf != '\r' && *buf != ' ')
+            {
+                ++buf;
+            }
+
+            ++lines_count;
+        }
+    }
+
+    return lines_count;
+}
+
+//==============================================================================
+
+size_t SplitBufIntoLines(char *buf)
+{
+    size_t lines_count = 0;
+
+    while (*buf != '\0')
+    {
+        if ((*buf) == '\n' || (*buf) == '\r')
+        {
+            while (*buf == '\n' || *buf == '\r')
+            {
+                *(buf++) = '\0';
+            }
+        }
+        else
+        {
+            while ((*buf) != '\n' && *buf != '\0' && *buf != '\r')
             {
                 ++buf;
             }
@@ -160,6 +200,7 @@ void FillText(Text *text)
 void PrintTextInFile(FILE *output_file,
                      Text *text)
 {
+    printf("l  - %d\n", text->lines_count);
     for (size_t i = 0; i < text->lines_count; i++)
     {
         fprintf(output_file, "%s\n", *(text->lines_ptr + i));

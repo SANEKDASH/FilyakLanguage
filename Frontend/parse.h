@@ -1,23 +1,23 @@
 #ifndef PARSE_HEADER
 #define PARSE_HEADER
 
-#include "../trees.h"
+#include "../Common/trees.h"
+#include "../Stack/stack.h"
 
-TreeNode *GetG(Variables *vars, Expr *expr);
+TreeNode *GetG(Variables *vars, const char *file_name);
 
-TreeNode *GetE(Variables *vars, Expr *expr);
+TreeNode *GetL(Variables *vars, Stack *stk, size_t *iter);
 
-TreeNode *GetP(Variables *vars, Expr *expr);
+TreeNode *GetE(Variables *vars, Stack *stk, size_t *iter);
 
-TreeNode *GetT(Variables *vars, Expr *expr);
+TreeNode *GetP(Variables *vars, Stack *stk, size_t *iter);
 
-TreeNode* GetN(Variables *vars, Expr *expr);
+TreeNode *GetT(Variables *vars, Stack *stk, size_t *iter);
 
-TreeNode *GetId(Variables *vars, Expr *expr);
+TreeNode* GetN(Variables *vars, Stack *stk, size_t *iter);
 
-TreeNode *GetA(Variables *vars, Expr *expr);
+TreeNode *GetId(Variables *vars, Stack *stk, size_t *iter);
 
-TreeNode *GetO(Variables *vars, Expr *expr);
-
+TreeNode *GetA(Variables *vars, Stack *stk, size_t *iter);
 
 #endif

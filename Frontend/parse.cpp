@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include "lexer.h"
 #include "parse.h"
-#include "../trees.h"
-
+#include "../Common/trees.h"
+#include "lexer.h"
+#include "../Stack/stack.h"
 
 static const char *output_file_name = "TOP_G_DUMP.txt";
 static FILE *output_file = nullptr;
@@ -13,29 +15,24 @@ static FILE *output_file = nullptr;
 
 static void SkipSpaces(Expr *expr);
 
-static const int kMaxIdLen = 64;
-
-TreeNode *GetG(Variables *vars, Expr *expr) // !!!! rename
+TreeNode *GetG(Variables  *vars,
+               const char *file_name)
 {
-    #define CUR_CHAR expr->string[expr->pos]
-    #define STRING   expr->string
-    #define POS      expr->pos
-
     output_file = fopen(output_file_name, "w");
     LOG_PRINT("im GetG leading all work\n\n");
 
-    TreeNode *node = GetE(vars, expr);
+    Text program;
+    ReadTextFromFile(&program, file_name, SplitBufIntoLines);
 
-    SkipSpaces(expr);
+    Stack lexems;
+    StackInit(&lexems);
 
-    if (CUR_CHAR != '\0')
-    {
-        printf("GetG() syntax error pos %d, string %s\n", POS, STRING + POS);
+    SplitOnLexems(&program, &lexems, vars);
 
-        return nullptr;
-    }
-
+    size_t i = 0;
+    TreeNode *node = GetL(vars, &lexems, &i);;
     SetParents(node);
+
 
     fclose(output_file);
 
@@ -46,261 +43,215 @@ TreeNode *GetG(Variables *vars, Expr *expr) // !!!! rename
 
 //==============================================================================
 
-TreeNode *GetP(Variables *vars, Expr *expr)
+TreeNode *GetL(Variables *vars, Stack *stk, size_t *iter)
 {
-    LOG_PRINT("i'm getP reading '(' and ')' on pos %d\n\t%s\n\n", POS, STRING+ POS);
+    #define CUR_NODE      stk->stack_data.data[*iter]
+    #define CUR_NODE_TYPE stk->stack_data.data[*iter]->type
+    #define CUR_NODE_DATA stk->stack_data.data[*iter]->data.key_word_code
+    #define DPR           printf("POS %d, LINE %d, FUNC %s\n", *iter, __LINE__, __func__);
 
-    TreeNode *node = nullptr;
-
-    SkipSpaces(expr);
-
-    if (CUR_CHAR == '(')
+    if (*iter >= stk->stack_data.size)
     {
-        POS++;
+        return nullptr;
+    }
 
-        node = GetE(vars, expr);
+    if (CUR_NODE_TYPE == kEndOfLine)
+    {
+DPR
+        TreeNode *node = CUR_NODE;
+        ++*iter;
+DPR
+        node->left = GetE(vars, stk, iter);
+        printf("%p\n", node);
 
-        SkipSpaces(expr);
+DPR
 
-        if (CUR_CHAR != ')')
+        if (node->left == nullptr)
         {
-            printf("GetP() syntax error pos %d, string %s\n", POS, STRING+ POS);
+            return nullptr;//?
         }
+DPR
 
-        ++POS;
+        node->right = GetL(vars, stk, iter);
+DPR
 
         return node;
     }
+    printf("syntax error POS %d", *iter);
+
+    return nullptr;
+}
+
+
+TreeNode *GetP(Variables *vars, Stack *stk, size_t *iter)
+{
+DPR
+    printf("POS -> %d, LINE -> %d. FUNC %s\n", *iter, __LINE__, __func__);
+
+    LOG_PRINT("i'm getP reading '(' and ')' on pos %d\n", *iter);
+
+    TreeNode *node = nullptr;
+DPR
+    if (*iter <stk->stack_data.size)
+    {
+        if (CUR_NODE_TYPE == kOperator && CUR_NODE_DATA == kLeftBracket)
+        {
+            ++*iter;
+
+            node = GetE(vars, stk, iter);
+    DPR
+            if (CUR_NODE_TYPE != kOperator && CUR_NODE_DATA != kRightBracket)
+            {
+                printf("GetP() syntax error stk pos %d\n", *iter);
+
+                return nullptr;
+            }
+
+            ++*iter;
+
+            return node;
+        }
+        else
+        {
+            return GetA(vars, stk, iter);
+        }
+    }
+    DPR
+
+    return node;
+}
+
+//==============================================================================
+
+TreeNode *GetT(Variables *vars, Stack *stk, size_t *iter)
+{
+DPR
+    LOG_PRINT("i'm getT reading '*' and '/' on pos %d\n", *iter);
+
+    TreeNode* node_lhs = GetP(vars, stk, iter);
+DPR
+
+    if (*iter < stk->stack_data.size)
+    {
+        while ((*iter < stk->stack_data.size) &&
+                CUR_NODE_TYPE == kOperator &&
+               (CUR_NODE_DATA == kMult || CUR_NODE_DATA == kDiv ))
+        {
+
+    DPR
+            TreeNode *op = CUR_NODE;
+
+            ++*iter;
+
+            TreeNode *node_rhs = GetP(vars, stk, iter);
+
+            op->left  = node_lhs;
+            op->right = node_rhs;
+
+            node_lhs = op;
+        }
+    DPR
+    }
+    DPR
+    return node_lhs;
+}
+
+//==============================================================================
+
+TreeNode *GetA(Variables *vars, Stack *stk, size_t *iter)
+{
+    LOG_PRINT("Im GetA[rgument] reading args on pos %d,\n", *iter);
+
+DPR
+    if (CUR_NODE_TYPE == kConstNumber)
+    {
+        return GetN(vars, stk, iter);
+    }
     else
     {
-        return GetA(vars, expr);
+        return GetId(vars, stk, iter);
     }
 }
 
 //==============================================================================
 
-TreeNode *GetT(Variables *vars, Expr *expr)
+TreeNode *GetE(Variables *vars, Stack *stk, size_t *iter)
 {
-    LOG_PRINT("i'm getT reading '*' and '/' on pos %d\n\t%s\n\n", POS, STRING+ POS);
+    LOG_PRINT("i'm getE reading '+' and '-' op pos %d\n", *iter);
 
-    TreeNode* node_lhs = GetP(vars, expr);
-
-    while (CUR_CHAR == '*' || CUR_CHAR == '/')
+    TreeNode *node_lhs = GetT(vars, stk, iter);
+DPR
+    if (*iter < stk->stack_data.size)
     {
-        char op = CUR_CHAR;
-
-        POS++;
-
-        TreeNode *node_rhs = GetP(vars, expr);
-
-        switch (op)
+        while ((*iter < stk->stack_data.size) &&
+                 CUR_NODE_TYPE == kOperator &&
+                (CUR_NODE_DATA == kAdd ||
+                 CUR_NODE_DATA == kSub ||
+                 CUR_NODE_DATA == kAssign))
         {
-            case '*':
-            {
-                node_lhs =  NodeCtor(nullptr,
-                                     node_lhs,
-                                     node_rhs,
-                                     kOperator,
-                                     kMult);
+            TreeNode *op = CUR_NODE;
 
-                break;
+            if (op->data.key_word_code == kAssign)
+            {
+                if (node_lhs->type != kIdentificator)
+                {
+                    printf("Expected identificator POS %d\n ", *iter);
+
+                    return nullptr;
+                }
             }
 
-            case '/':
-            {
-                node_lhs = NodeCtor(nullptr,
-                                    node_lhs,
-                                    node_rhs,
-                                    kOperator,
-                                    kDiv);
+            ++*iter;
 
-                break;
-            }
+            TreeNode *node_rhs = GetT(vars, stk, iter);
 
-            default:
-            {
-                printf("GetT() syntax error pos %d, string %s\n", POS, STRING + POS);
-            }
+            op->left  = node_lhs;
+            op->right = node_rhs;
+
+            node_lhs = op;
         }
     }
+   DPR
 
     return node_lhs;
 }
 
 //==============================================================================
 
-TreeNode *GetA(Variables *vars, Expr *expr)
+TreeNode* GetN(Variables *vars, Stack *stk, size_t *iter)
 {
-    LOG_PRINT("Im GetA[rgument] reading args on pos %d,\n\t string %s\n\n", POS, STRING+ POS);
-    SkipSpaces(expr);
+    LOG_PRINT("i'm getN reading numbers on pos %d\n",*iter);
 
-    if (isdigit(CUR_CHAR) || CUR_CHAR == '-')
+    if (CUR_NODE_TYPE == kConstNumber)
     {
-        return GetN(vars, expr);
-    }
-    else
-    {
-        return GetId(vars, expr);
+        TreeNode *node = CUR_NODE;
+        ++*iter;
+
+    LOG_PRINT("i'm getN rode numbers %d\n",*iter);
+
+        return node;
     }
 }
 
 //==============================================================================
 
-TreeNode *GetE(Variables *vars, Expr *expr)
+static const int kMaxIdLen = 64;
+
+TreeNode *GetId(Variables *vars, Stack *stk, size_t *iter)
 {
-    LOG_PRINT("i'm getE reading '+' and '-' op pos %d\n\t%s\n\n", POS, STRING+ POS);
+    LOG_PRINT("Im GetV reading variables on pos %d,\n", *iter);
 
-    TreeNode *node_lhs = GetT(vars, expr);
-
-    while (CUR_CHAR == '+' || CUR_CHAR == '-')
+    if (CUR_NODE_TYPE == kIdentificator)
     {
-        char op = CUR_CHAR;
+        TreeNode *node = CUR_NODE;
+        ++*iter;
 
-        POS++;
+        LOG_PRINT("Im GetV rode variables on pos %d,\n", *iter);
 
-        TreeNode *node_rhs = GetT(vars, expr);
-
-        switch (op)
-        {
-            case '+':
-            {
-                node_lhs = NodeCtor(nullptr,
-                                    node_lhs,
-                                    node_rhs,
-                                    kOperator,
-                                    kAdd);
-
-                break;
-            }
-
-            case '-':
-            {
-                node_lhs = NodeCtor(nullptr,
-                                    node_lhs,
-                                    node_rhs,
-                                    kOperator,
-                                    kSub);
-
-                break;
-            }
-
-            default:
-            {
-                printf("GetE() syntax error pos %d, string %s\n", POS, STRING+ POS);
-            }
-        }
+        return node;
     }
 
-    return node_lhs;
-}
-
-//==============================================================================
-
-TreeNode* GetN(Variables *vars, Expr *expr)
-{
-    LOG_PRINT("i'm getN reading numbers on pos %d\n\t%s\n\n", POS, STRING+ POS);
-
-    SkipSpaces(expr);
-
-    int val = 0;
-    size_t old_pos = POS;
-    char *num_end = nullptr;
-
-    val = strtod(STRING+ POS, &num_end);
-
-    POS = num_end - STRING;
-
-    if (POS <= old_pos)
-    {
-        printf("GetN() syntax error pos %d, string %s\n", POS, STRING + POS);
-    }
-
-    SkipSpaces(expr);
-
-    return NodeCtor(nullptr,
-                    nullptr,
-                    nullptr,
-                    kConstNumber,
-                    val);
-}
-
-//==============================================================================
-
-TreeNode *GetId(Variables *vars, Expr *expr)
-{
-    LOG_PRINT("Im GetV reading variables on pos %d,\n\t string : %s\n\n", POS, STRING + POS);
-
-    SkipSpaces(expr);
-
-    if (strncmp(STRING + POS, "cos(", 4) == 0)
-    {
-        POS += 3;
-
-        return NodeCtor(nullptr,
-                        nullptr,
-                        GetP(vars, expr),
-                        kOperator,
-                        kCos);
-    }
-    else if (strncmp(STRING + POS, "sin(", 4) == 0)
-    {
-        POS += 3;
-
-        return NodeCtor(nullptr,
-                        nullptr,
-                        GetP(vars, expr),
-                        kOperator,
-                        kSin);
-    }
-    else if (strncmp(STRING + POS, "sqrt(", 5) == 0)
-    {
-        POS += 2;
-//добавить универсальность после введения правил\
-(считали до конца букв и т.д. затем проверили базовую хуйню)\
- если совпадает айди в таблице имен, то вбиваем, если нет, то добавляем в айди(Variables)
-        return NodeCtor(nullptr,
-                        nullptr,
-                        GetP(vars, expr),
-                        kOperator,
-                        kSqrt);
-    }
-
-    static char var_name[kMaxIdLen] = {0};
-    var_name[0] = '\0';
-    size_t i = 0;
-
-    while (isalpha(CUR_CHAR))
-    {
-        var_name[i++] = CUR_CHAR;
-        ++POS;
-    }
-    var_name[i] = '\0';
-
-    int var_pos = SeekVariable(vars, var_name);
-
-    if (var_pos < 0)
-    {
-        var_pos = AddVar(vars, strdup(var_name));
-
-    }
-
-    SkipSpaces(expr);
-
-    return NodeCtor(nullptr,
-                    nullptr,
-                    nullptr,
-                    kIdentificator,
-                    var_pos);
-}
-
-//==============================================================================
-
-static void SkipSpaces(Expr *expr)
-{
-    while (isspace(CUR_CHAR))
-    {
-        POS++;
-    }
+    return nullptr;
 }
 
 //==============================================================================

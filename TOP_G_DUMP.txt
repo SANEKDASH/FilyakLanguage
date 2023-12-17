@@ -1,47 +1,57 @@
 im GetG leading all work
 
-i'm getE reading '+' and '-' op pos 0
-	pidr + sin(huy)
-
-i'm getT reading '*' and '/' on pos 0
-	pidr + sin(huy)
-
-i'm getP reading '(' and ')' on pos 0
-	pidr + sin(huy)
-
-Im GetA[rgument] reading args on pos 0,
-	 string pidr + sin(huy)
-
-Im GetV reading variables on pos 0,
-	 string : pidr + sin(huy)
-
-i'm getT reading '*' and '/' on pos 6
-	 sin(huy)
-
-i'm getP reading '(' and ')' on pos 6
-	 sin(huy)
-
+i'm getE reading '+' and '-' op pos 1
+i'm getT reading '*' and '/' on pos 1
+i'm getP reading '(' and ')' on pos 1
+Im GetA[rgument] reading args on pos 1,
+Im GetV reading variables on pos 1,
+Im GetV rode variables on pos 2,
+i'm getT reading '*' and '/' on pos 3
+i'm getP reading '(' and ')' on pos 3
+Im GetA[rgument] reading args on pos 3,
+i'm getN reading numbers on pos 3
+i'm getN rode numbers 4
+i'm getP reading '(' and ')' on pos 5
+Im GetA[rgument] reading args on pos 5,
+Im GetV reading variables on pos 5,
+Im GetV rode variables on pos 6,
+i'm getE reading '+' and '-' op pos 7
+i'm getT reading '*' and '/' on pos 7
+i'm getP reading '(' and ')' on pos 7
 Im GetA[rgument] reading args on pos 7,
-	 string sin(huy)
-
 Im GetV reading variables on pos 7,
-	 string : sin(huy)
-
-i'm getP reading '(' and ')' on pos 10
-	(huy)
-
+Im GetV rode variables on pos 8,
+i'm getT reading '*' and '/' on pos 9
+i'm getP reading '(' and ')' on pos 9
+Im GetA[rgument] reading args on pos 9,
+Im GetV reading variables on pos 9,
+Im GetV rode variables on pos 10,
 i'm getE reading '+' and '-' op pos 11
-	huy)
-
 i'm getT reading '*' and '/' on pos 11
-	huy)
-
 i'm getP reading '(' and ')' on pos 11
-	huy)
-
 Im GetA[rgument] reading args on pos 11,
-	 string huy)
-
-Im GetV reading variables on pos 11,
-	 string : huy)
-
+i'm getN reading numbers on pos 11
+i'm getN rode numbers 12
+i'm getT reading '*' and '/' on pos 13
+i'm getP reading '(' and ')' on pos 13
+Im GetA[rgument] reading args on pos 13,
+i'm getN reading numbers on pos 13
+i'm getN rode numbers 14
+i'm getE reading '+' and '-' op pos 15
+i'm getT reading '*' and '/' on pos 15
+i'm getP reading '(' and ')' on pos 15
+Im GetA[rgument] reading args on pos 15,
+i'm getN reading numbers on pos 15
+i'm getN rode numbers 16
+i'm getP reading '(' and ')' on pos 17
+i'm getE reading '+' and '-' op pos 18
+i'm getT reading '*' and '/' on pos 18
+i'm getP reading '(' and ')' on pos 18
+Im GetA[rgument] reading args on pos 18,
+i'm getN reading numbers on pos 18
+i'm getN rode numbers 19
+i'm getT reading '*' and '/' on pos 20
+i'm getP reading '(' and ')' on pos 20
+Im GetA[rgument] reading args on pos 20,
+Im GetV reading variables on pos 20,
+Im GetV rode variables on pos 21,
