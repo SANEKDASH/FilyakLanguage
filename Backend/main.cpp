@@ -7,14 +7,11 @@
 int main(int argc, char *argv[])
 {
     InitTreeGraphDump();
-    LanguageElems l_elems = {0};
 
+    LanguageElems l_elems = {0};
     LanguageElemsInit(&l_elems);
 
-
     ReadLanguageElemsOutOfFile(&l_elems, argv[1]);
-
-    printf("HUY");
 
     MakeAsmCode(&l_elems, "assembled.txt");
 

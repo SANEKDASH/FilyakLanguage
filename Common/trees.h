@@ -12,9 +12,18 @@ struct Expr
     size_t pos = 0;
 };
 
+typedef enum
+{
+    kVar,
+    kFunc,
+    kUndefined,
+} IdType_t;
+
 struct Variable
 {
     const char *id = nullptr;
+    bool        declaration_state;
+    IdType_t    id_type;
 };
 
 struct Variables

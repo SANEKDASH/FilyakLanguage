@@ -32,7 +32,6 @@ LexerErrs_t SplitOnLexems(Text      *text,
 
     for (size_t i = 0; i < text->lines_count; i++)
     {
-        printf("current line - %d\n", i);
 
         Expr expr;
         expr.string = text->lines_ptr[i];
@@ -78,7 +77,7 @@ static int GetLexem(Stack     *stk,
 
     TreeNode *node = nullptr;
 
-    if (isdigit(CUR_CHAR))
+    if (isdigit(CUR_CHAR) || CUR_CHAR == '-')
     {
         Push(stk, GetNumber(expr));
     }
@@ -89,11 +88,6 @@ static int GetLexem(Stack     *stk,
         if (node == nullptr)
         {
             node = GetId(expr, vars);
-        }
-
-        if (node ->type == kIdentificator)
-        {
-            printf("%s\n", vars->var_array[node->data.variable_pos].id);
         }
 
         if (Push(stk, node) != kStackClear)
@@ -154,6 +148,11 @@ static TreeNode *GetOperation(Expr *expr)
         {
             node = OP_CTOR(i + 1);
             POS += NameTable[i].word_len;
+            if (i+1 == kRightBracket)
+            {
+                printf("mother was fucked\n");
+                printf("OP_CODE %d\n", i + 1);
+            }
         }
     }
 
@@ -192,7 +191,6 @@ static TreeNode *GetId(Expr      *expr,
     {
         id_pos = AddVar(vars, strdup(var_name));
     }
-
     SkipExprSpaces(expr);
 
     return ID_CTOR(id_pos);

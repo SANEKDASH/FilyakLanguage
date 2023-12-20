@@ -1,0 +1,76 @@
+digraph List
+{
+	rankdir = TB;
+	graph [bgcolor = "black"]
+	node[color ="black", fontsize=14, shape = Mrecord];
+	edge[color = "red", fontcolor = "blue",fontsize = 12];
+
+
+node00EB4798 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "op: ; | {type : OPERATOR | op_code : 29} | {parent: 00000000 | pointer: 00EB4798 | left: 00EB47B8 | right: 00000000} "]
+node00EB47B8 [style = filled, fillcolor = "white", shape = Mrecord, label = "FUNC POS: 0 | type : FUNC DEF | {parent: 00000000 | pointer: 00EB47B8 | left: 00EB47D8 | right: 00EB47F8} "]
+node00EB47D8 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "op: долбоеб | {type : OPERATOR | op_code : 30} | {parent: 00000000 | pointer: 00EB47D8 | left: 00000000 | right: 00000000} "]
+node00EB47F8 [style = filled, fillcolor = "yellow", shape = Mrecord, label = "FUNC TYPE: 0 | type : PARAMS | {parent: 00000000 | pointer: 00EB47F8 | left: 00000000 | right: 00EB4818} "]
+node00EB4818 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "op: ; | {type : OPERATOR | op_code : 29} | {parent: 00000000 | pointer: 00EB4818 | left: 00EB4838 | right: 00EB4878} "]
+node00EB4838 [style = filled, fillcolor = "orange", shape = Mrecord, label = "VAR POS: 1 | type : VAR DECLARATION | {parent: 00000000 | pointer: 00EB4838 | left: 00EB4858 | right: 00000000} "]
+node00EB4858 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "op: долбоеб | {type : OPERATOR | op_code : 30} | {parent: 00000000 | pointer: 00EB4858 | left: 00000000 | right: 00000000} "]
+node00EB4878 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "op: ; | {type : OPERATOR | op_code : 29} | {parent: 00000000 | pointer: 00EB4878 | left: 00EB4898 | right: 00EB48D8} "]
+node00EB4898 [style = filled, fillcolor = "orange", shape = Mrecord, label = "VAR POS: 2 | type : VAR DECLARATION | {parent: 00000000 | pointer: 00EB4898 | left: 00EB48B8 | right: 00000000} "]
+node00EB48B8 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "op: долбоеб | {type : OPERATOR | op_code : 30} | {parent: 00000000 | pointer: 00EB48B8 | left: 00000000 | right: 00000000} "]
+node00EB48D8 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "op: ; | {type : OPERATOR | op_code : 29} | {parent: 00000000 | pointer: 00EB48D8 | left: 00EB48F8 | right: 00EB04B0} "]
+node00EB48F8 [style = filled, fillcolor = "orange", shape = Mrecord, label = "VAR POS: 3 | type : VAR DECLARATION | {parent: 00000000 | pointer: 00EB48F8 | left: 00EB4918 | right: 00000000} "]
+node00EB4918 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "op: долбоеб | {type : OPERATOR | op_code : 30} | {parent: 00000000 | pointer: 00EB4918 | left: 00000000 | right: 00000000} "]
+node00EB04B0 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "op: ; | {type : OPERATOR | op_code : 29} | {parent: 00000000 | pointer: 00EB04B0 | left: 00EB7970 | right: 00EB7950} "]
+node00EB7970 [style = filled, fillcolor = "orange", shape = Mrecord, label = "VAR POS: 4 | type : VAR DECLARATION | {parent: 00000000 | pointer: 00EB7970 | left: 00EB79B0 | right: 00000000} "]
+node00EB79B0 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "op: долбоеб | {type : OPERATOR | op_code : 30} | {parent: 00000000 | pointer: 00EB79B0 | left: 00000000 | right: 00000000} "]
+node00EB7950 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "op: ; | {type : OPERATOR | op_code : 29} | {parent: 00000000 | pointer: 00EB7950 | left: 00EB7C30 | right: 00EB7B10} "]
+node00EB7C30 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "op: ты | {type : OPERATOR | op_code : 12} | {parent: 00000000 | pointer: 00EB7C30 | left: 00EB7A50 | right: 00EB7A90} "]
+node00EB7A50 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "op: потерял_птсы | {type : OPERATOR | op_code : 2} | {parent: 00000000 | pointer: 00EB7A50 | left: 00EB78D0 | right: 00EB78F0} "]
+node00EB78D0 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "op: посадить_на_zxc | {type : OPERATOR | op_code : 3} | {parent: 00000000 | pointer: 00EB78D0 | left: 00EB7AB0 | right: 00EB7BD0} "]
+node00EB7AB0 [style = filled, fillcolor = "pink", shape = Mrecord, label = "ID_POS: 2 | type : VAR | {parent: 00000000 | pointer: 00EB7AB0 | left: 00000000 | right: 00000000} "]
+node00EB7BD0 [style = filled, fillcolor = "pink", shape = Mrecord, label = "ID_POS: 2 | type : VAR | {parent: 00000000 | pointer: 00EB7BD0 | left: 00000000 | right: 00000000} "]
+node00EB78F0 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "op: посадить_на_zxc | {type : OPERATOR | op_code : 3} | {parent: 00000000 | pointer: 00EB78F0 | left: 00EB7910 | right: 00EB78B0} "]
+node00EB7910 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "op: посадить_на_zxc | {type : OPERATOR | op_code : 3} | {parent: 00000000 | pointer: 00EB7910 | left: 00EB7A10 | right: 00EB7A70} "]
+node00EB7A10 [style = filled, fillcolor = "pink", shape = Mrecord, label = "ID_POS: 1 | type : VAR | {parent: 00000000 | pointer: 00EB7A10 | left: 00000000 | right: 00000000} "]
+node00EB7A70 [style = filled, fillcolor = "pink", shape = Mrecord, label = "ID_POS: 3 | type : VAR | {parent: 00000000 | pointer: 00EB7A70 | left: 00000000 | right: 00000000} "]
+node00EB78B0 [style = filled, fillcolor = "lightblue", shape = Mrecord, label = "data: 4 | type : CONSTANT | {parent: 00000000 | pointer: 00EB78B0 | left: 00000000 | right: 00000000} "]
+node00EB7A90 [style = filled, fillcolor = "pink", shape = Mrecord, label = "ID_POS: 4 | type : VAR | {parent: 00000000 | pointer: 00EB7A90 | left: 00000000 | right: 00000000} "]
+node00EB7B10 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "op: ; | {type : OPERATOR | op_code : 29} | {parent: 00000000 | pointer: 00EB7B10 | left: 00EB7930 | right: 00000000} "]
+node00EB7930 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "op: ты | {type : OPERATOR | op_code : 12} | {parent: 00000000 | pointer: 00EB7930 | left: 00EB7AD0 | right: 00EB7B30} "]
+node00EB7AD0 [style = filled, fillcolor = "lightgreen", shape = Mrecord, label = "op: трент_ультанул | {type : OPERATOR | op_code : 9} | {parent: 00000000 | pointer: 00EB7AD0 | left: 00000000 | right: 00EB7C10} "]
+node00EB7C10 [style = filled, fillcolor = "pink", shape = Mrecord, label = "ID_POS: 4 | type : VAR | {parent: 00000000 | pointer: 00EB7C10 | left: 00000000 | right: 00000000} "]
+node00EB7B30 [style = filled, fillcolor = "pink", shape = Mrecord, label = "ID_POS: 4 | type : VAR | {parent: 00000000 | pointer: 00EB7B30 | left: 00000000 | right: 00000000} "]
+node00EB4798->node00EB47B8
+node00EB47B8->node00EB47D8
+node00EB47B8->node00EB47F8
+node00EB47F8->node00EB4818
+node00EB4818->node00EB4838
+node00EB4818->node00EB4878
+node00EB4838->node00EB4858
+node00EB4878->node00EB4898
+node00EB4878->node00EB48D8
+node00EB4898->node00EB48B8
+node00EB48D8->node00EB48F8
+node00EB48D8->node00EB04B0
+node00EB48F8->node00EB4918
+node00EB04B0->node00EB7970
+node00EB04B0->node00EB7950
+node00EB7970->node00EB79B0
+node00EB7950->node00EB7C30
+node00EB7950->node00EB7B10
+node00EB7C30->node00EB7A50
+node00EB7C30->node00EB7A90
+node00EB7A50->node00EB78D0
+node00EB7A50->node00EB78F0
+node00EB78D0->node00EB7AB0
+node00EB78D0->node00EB7BD0
+node00EB78F0->node00EB7910
+node00EB78F0->node00EB78B0
+node00EB7910->node00EB7A10
+node00EB7910->node00EB7A70
+node00EB7B10->node00EB7930
+node00EB7930->node00EB7AD0
+node00EB7930->node00EB7B30
+node00EB7AD0->node00EB7C10
+
+
+}

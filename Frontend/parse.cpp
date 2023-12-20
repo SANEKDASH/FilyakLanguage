@@ -4,21 +4,24 @@
 #include "lexer.h"
 #include "parse.h"
 #include "../Common/trees.h"
-#include "lexer.h"
 #include "../Stack/stack.h"
 
 static const char *output_file_name = "TOP_G_DUMP.txt";
-static FILE *output_file = nullptr;
+static FILE       *output_file      = nullptr;
 
 #define LOG_PRINT(...) fprintf(output_file, __VA_ARGS__);
 
 static bool IsUnaryOp      (KeyCode_t op_code);
 static bool IsBinaryOpLower(KeyCode_t op_code);
 static bool IsType         (KeyCode_t op_code);
+static bool IsFunc         (KeyCode_t op_code);
+
 
 static void SkipSpaces(Expr *expr);
 
-static TreeNode *GetDeclaration(Variables *vars, Stack *stk, size_t *iter);
+static TreeNode *GetDeclaration  (Variables *vars, Stack *stk, size_t *iter);
+static TreeNode *GetConditionalOp(Variables *vars, Stack *stk, size_t *iter);
+static TreeNode *GetParams       (Variables *vars, Stack *stk, size_t *iter);
 
 TreeNode *GetG(Variables  *vars,
                const char *file_name)
@@ -34,7 +37,6 @@ TreeNode *GetG(Variables  *vars,
 
     Stack lexems;
     StackInit(&lexems);
-
     SplitOnLexems(&program, &lexems, vars);
     size_t i = 0;
     TreeNode *node = GetL(vars, &lexems, &i);;
@@ -51,14 +53,22 @@ TreeNode *GetG(Variables  *vars,
 
 TreeNode *GetL(Variables *vars, Stack *stk, size_t *iter)
 {
+    #define OP_CTOR(op_code) NodeCtor(nullptr, nullptr, nullptr, kOperator, op_code)
+
     #define CUR_NODE       stk->stack_data.data[*iter]
     #define CUR_NODE_TYPE  stk->stack_data.data[*iter]->type
     #define CUR_NODE_DATA  stk->stack_data.data[*iter]->data.key_word_code
+
+    #define CUR_ID_STATE   vars->var_array[stk->stack_data.data[*iter]->data.variable_pos].declaration_state
+    #define CUR_ID_TYPE    vars->var_array[stk->stack_data.data[*iter]->data.variable_pos].id_type
+    #define CUR_ID         vars->var_array[stk->stack_data.data[*iter]->data.variable_pos].id
+
     #define NEXT_NODE      stk->stack_data.data[*iter + 1]
     #define NEXT_NODE_TYPE stk->stack_data.data[*iter + 1]->type
     #define NEXT_NODE_DATA stk->stack_data.data[*iter + 1]->data.key_word_code
 
     #define DPR printf("POS %d, LINE %d, FUNC %s\n", *iter, __LINE__, __func__);
+
 
     if (*iter >= stk->stack_data.size)
     {
@@ -66,41 +76,53 @@ TreeNode *GetL(Variables *vars, Stack *stk, size_t *iter)
     }
 
     TreeNode *cur_op = nullptr;
-DPR
+
     if (CUR_NODE_TYPE == kOperator)
     {
         if (CUR_NODE_DATA == kIf)
         {
-            TreeNode *cond_node = CUR_NODE;
+            cur_op = OP_CTOR(kEndOfLine);
 
-            cur_op = cond_node;
+            cur_op->left = GetConditionalOp(vars, stk, iter);
 
-            ++*iter;
+            cur_op->right = GetL(vars, stk, iter);
 
-            cur_op->left  = GetP(vars, stk, iter);
-
-            cur_op->right = GetCode(vars, stk, iter);
+            return cur_op;
         }
         else if (IsType(CUR_NODE_DATA))
         {
-    DPR
             cur_op = GetDeclaration(vars, stk, iter);
+
+            if (cur_op->type == kFuncDef)
+            {
+                TreeNode *next_func = OP_CTOR(kEndOfLine);
+
+                next_func->left  = cur_op;
+
+                next_func->right = GetL(vars, stk, iter);
+
+                return next_func;
+            }
         }
     }
     else if (CUR_NODE_TYPE  == kIdentificator)
     {
-    DPR
-        if (NEXT_NODE_TYPE == kOperator &&
-            NEXT_NODE_DATA == kAssign)
+        if (CUR_ID_STATE == true && CUR_ID_TYPE == kVar)
         {
-   DPR
-            cur_op        = NEXT_NODE;
-            cur_op->right = CUR_NODE;
+            if (NEXT_NODE_TYPE == kOperator &&
+                NEXT_NODE_DATA == kAssign)
+            {
+                cur_op        = NEXT_NODE;
+                cur_op->right = CUR_NODE;
 
-            *iter += 2;
-    DPR
-            cur_op->left = GetE(vars, stk, iter);
-    DPR
+                *iter += 2;
+
+                cur_op->left = GetE(vars, stk, iter);
+            }
+        }
+        else
+        {
+            printf(">> UNDEFINED IDENTIFICATOR - \"%s\", POS: %d\n", CUR_ID, *iter);
         }
     }
     else
@@ -113,14 +135,13 @@ DPR
         }
     }
 
-    DPR
-
     //это условие явно поменяется в скором будущем(хуй знает)
     if (*iter < stk->stack_data.size)
     {
         if (CUR_NODE_TYPE == kOperator &&
             CUR_NODE_DATA == kEndOfLine)
         {
+    DPR
             TreeNode *next_op = CUR_NODE;
 
             ++(*iter);
@@ -130,7 +151,6 @@ DPR
             if (*iter < stk->stack_data.size)
             {
     DPR
-
                 next_op->right = GetL(vars, stk, iter);
             }
 
@@ -237,9 +257,9 @@ DPR
 
     if (*iter < stk->stack_data.size)
     {
-        while ((*iter < stk->stack_data.size) &&
-                 CUR_NODE_TYPE == kOperator   &&
-                 IsBinaryOpLower(stk->stack_data.data[*iter]->data.key_word_code))
+        while ( (*iter < stk->stack_data.size)  &&
+                CUR_NODE_TYPE == kOperator      &&
+                IsBinaryOpLower(CUR_NODE_DATA)     )
         {
             TreeNode *op = CUR_NODE;
 
@@ -287,11 +307,34 @@ TreeNode *GetId(Variables *vars, Stack *stk, size_t *iter)
 {
     if (CUR_NODE_TYPE == kIdentificator)
     {
-        TreeNode *node = CUR_NODE;
+        TreeNode *identificator = CUR_NODE;
 
         ++*iter;
 
-        return node;
+        /*if (CUR_NODE_TYPE == kOperator &&
+            CUR_NODE_DATA == kLeftBracket)
+        {
+            //добавить параметры
+
+            TreeNode *call = NodeCtor(nullptr, nullptr, nullptr, kCall, 0);
+
+            call->left = nullptr;
+
+            call->right = identificator;
+
+            *iter += 2;
+
+            return call;
+        }*/
+
+        return identificator;
+    }
+    else if (CUR_NODE_TYPE == kOperator &&
+             IsFunc(CUR_NODE_DATA))
+    {
+        TreeNode *func = CUR_NODE;
+        ++(*iter);
+        func->right = GetP(vars, stk, iter);
     }
 
     return nullptr;
@@ -363,6 +406,18 @@ static bool IsType(KeyCode_t op_code)
     return op_code == kDoubleType;
 }
 
+static bool IsFunc(KeyCode_t op_code)
+{
+    return op_code == kSin   ||
+           op_code == kCos   ||
+           op_code == kFloor ||
+           op_code == kDiff  ||
+           op_code == kSqrt  ||
+           op_code == kPrint;
+}
+
+//==============================================================================
+
 static TreeNode *GetDeclaration(Variables *vars, Stack *stk, size_t *iter)
 {
     TreeNode *decl = nullptr;
@@ -372,14 +427,95 @@ static TreeNode *GetDeclaration(Variables *vars, Stack *stk, size_t *iter)
 
     if (CUR_NODE_TYPE == kIdentificator)
     {
-        decl = NodeCtor(nullptr,
-                        type,
-                        nullptr,
-                        kVarDecl,
-                        stk->stack_data.data[*iter]->data.variable_pos);
+        TreeNode *identificator = CUR_NODE;
 
         ++(*iter);
+
+        if (CUR_NODE_TYPE == kOperator &&
+            CUR_NODE_DATA == kLeftBracket)
+        {
+            decl = NodeCtor(nullptr, type, nullptr, kFuncDef, identificator->data.variable_pos);
+            ++(*iter);
+
+            TreeNode *params = NodeCtor(nullptr, nullptr, nullptr, kParamsNode, 0);
+
+            params->left = GetParams(vars, stk, iter);
+
+            ++(*iter);
+
+            params->right = GetCode(vars, stk, iter);
+
+            decl->right = params;
+
+            vars->var_array[identificator->data.variable_pos].declaration_state = true;
+            vars->var_array[identificator->data.variable_pos].id_type              = kFunc;
+
+            return decl;
+        }
+        else
+        {
+            vars->var_array[identificator->data.variable_pos].declaration_state = true;
+            vars->var_array[identificator->data.variable_pos].id_type              = kVar;
+
+            decl = NodeCtor(nullptr,
+                            type,
+                            nullptr,
+                            kVarDecl,
+                            identificator->data.variable_pos);
+                            //+инициализация при объявлении
+        }
+
     }
+
+    DPR
 
     return decl;
 }
+
+//==============================================================================
+
+static TreeNode *GetConditionalOp(Variables *vars, Stack *stk, size_t *iter)
+{
+    TreeNode *cond_node = CUR_NODE;
+
+    ++*iter;
+
+    cond_node->left  = GetP(vars, stk, iter);
+
+    cond_node->right = GetCode(vars, stk, iter);
+
+    return cond_node;
+}
+
+//==============================================================================
+
+static TreeNode *GetParams(Variables *vars, Stack *stk, size_t *iter)
+{
+    if (CUR_NODE_TYPE == kOperator &&
+        CUR_NODE_DATA == kRightBracket)
+    {
+        return nullptr;
+    }
+
+    TreeNode *param = CUR_NODE;
+
+    ++(*iter);
+
+    if (CUR_NODE_TYPE == kOperator &&
+        CUR_NODE_DATA == kEnumOp)
+    {
+        TreeNode *next_param = CUR_NODE;
+
+        next_param->left = param;
+
+        ++(*iter);
+
+        next_param->right = GetParams(vars, stk, iter);
+
+        return next_param;
+    }
+
+    return param;
+}
+
+//==============================================================================

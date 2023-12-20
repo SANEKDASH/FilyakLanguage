@@ -21,17 +21,30 @@ TreeErrs_t MakeAsmCode(LanguageElems *l_elems,
 
     TreeNode *curr_op = l_elems->syntax_tree.root;
 
-    while (curr_op != nullptr)
-    {
-        AssembleOp(curr_op->left, &l_elems->vars, output_file);
-        curr_op = curr_op->right;
-    }
+    AsmMain(l_elems, output_file);
+
+    AsmFuncs(l_elems, output_file);
 
     fclose(output_file);
 
     return kTreeSuccess;
 }
 
+static TreeErrs_t AsmMain(LanguageElems *l_elems,
+                          FILE          *output_file)
+{
+    #define ASM_PRINT(...) fprintf(output_file, __VA_ARGS__)
+    #define ASM_NODE(node) AssembleOp(node, vars, output_file)
+
+    ASM_PRINT();
+
+}
+
+static TreeErrs_t AsmFuncs(LanguageElems *l_elems,
+                           FILE          *output_file)
+
+{
+}
 //что-то сделать со строками, т.к. они не должны просто так висеть
 //в плане push pop и т.д.
 
@@ -39,8 +52,6 @@ static TreeErrs_t AssembleOp(const TreeNode  *node,
                              const Variables *vars,
                              FILE            *output_file)
 {
-    #define ASM_PRINT(...) fprintf(output_file, __VA_ARGS__)
-    #define ASM_NODE(node) AssembleOp(node, vars, output_file)
     if (node == nullptr)
     {
         return kNullTree;

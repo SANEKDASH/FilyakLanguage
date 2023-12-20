@@ -1,3 +1,0 @@
-push 123
-push 321
-add

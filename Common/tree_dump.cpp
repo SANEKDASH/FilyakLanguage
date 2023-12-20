@@ -128,7 +128,7 @@ static void LogPrintTree(TreeNode *node,
     if (node->type == kOperator)
     {
         LOG_PRINT("node%p [style = filled, fillcolor = \"lightgreen\", shape = Mrecord, label = "
-                  "\"data: %s | {type : OPERATOR | op_code : %d} | {parent: %p | pointer: %p | left: %p | right: %p} \"]\n",
+                  "\"op: %s | {type : OPERATOR | op_code : %d} | {parent: %p | pointer: %p | left: %p | right: %p} \"]\n",
                   node,
                   NameTable[node->data.key_word_code - 1].key_word,
                   node->data.key_word_code,
@@ -151,7 +151,7 @@ static void LogPrintTree(TreeNode *node,
     else if (node->type == kIdentificator)
     {
         LOG_PRINT("node%p [style = filled, fillcolor = \"pink\", shape = Mrecord, label = "
-                  "\"data: %d | type : VAR | {parent: %p | pointer: %p | left: %p | right: %p} \"]\n",
+                  "\"ID_POS: %d | type : VAR | {parent: %p | pointer: %p | left: %p | right: %p} \"]\n",
                   node,
                   node->data.variable_pos,
                   node->parent,
@@ -170,7 +170,38 @@ static void LogPrintTree(TreeNode *node,
                   node->left,
                   node->right);
     }
-
+    else if (node->type == kFuncDef)
+    {
+        LOG_PRINT("node%p [style = filled, fillcolor = \"white\", shape = Mrecord, label = "
+                  "\"FUNC POS: %d | type : FUNC DEF | {parent: %p | pointer: %p | left: %p | right: %p} \"]\n",
+                  node,
+                  node->data.variable_pos,
+                  node->parent,
+                  node,
+                  node->left,
+                  node->right);
+    }
+    else if (node->type == kParamsNode)
+    {
+        LOG_PRINT("node%p [style = filled, fillcolor = \"yellow\", shape = Mrecord, label = "
+                  "\"FUNC TYPE: %d | type : PARAMS | {parent: %p | pointer: %p | left: %p | right: %p} \"]\n",
+                  node,
+                  node->data.key_word_code,
+                  node->parent,
+                  node,
+                  node->left,
+                  node->right);
+    }
+    else if (node->type == kCall)
+    {
+        LOG_PRINT("node%p [style = filled, fillcolor = \"yellow\", shape = Mrecord, label = "
+                  "\"type : CALL | {parent: %p | pointer: %p | left: %p | right: %p} \"]\n",
+                  node,
+                  node->parent,
+                  node,
+                  node->left,
+                  node->right);
+    }
     if (node->left != nullptr)
     {
         LogPrintTree(node->left, dot_file);

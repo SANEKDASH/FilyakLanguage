@@ -7,8 +7,9 @@ typedef enum
     kConstNumber    = 2,
     kIdentificator  = 3,
     kFuncDef        = 4,
-    kFuncParameters = 5,
+    kParamsNode     = 5,
     kVarDecl        = 6,
+    kCall           = 7,
 } ExpressionType_t;
 
 
@@ -45,8 +46,8 @@ typedef enum
     kEnumOp           = 28,
     kEndOfLine        = 29,
     kDoubleType       = 30,
-    kNextTransUnit    = 41,
-
+    kPrint            = 31,
+    kScan             = 32,
 } KeyCode_t;
 
 struct KeyWord
@@ -59,7 +60,7 @@ struct KeyWord
 static const KeyWord NameTable[]=
 {
     "лежать+сосать"         ,kAdd,              13,
-    "потерял_ранг"          ,kSub,              12,
+    "потерял_птсы"          ,kSub,              12,
     "посадить_на_zxc"       ,kMult,             15,
     "тычка"                 ,kDiv,              5,
     "углы_вымеряет"         ,kSin,              13,
