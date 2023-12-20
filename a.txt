@@ -1,8 +1,6 @@
-huy plus 1 mult pidr
+долбоеб канеки;
 
-huy minus pidr
+канеки ты 1000 потерял_ранг 7;
 
-1 minus 2
 
-1 div (3 plus huy)
 

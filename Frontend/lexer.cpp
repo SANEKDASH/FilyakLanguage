@@ -18,6 +18,10 @@ static int GetLexem(Stack     *stk,
 
 static void SkipExprSpaces(Expr *expr);
 
+static bool RusIsalpha(char c);
+
+static bool IsOperator(char c);
+
 LexerErrs_t SplitOnLexems(Text      *text,
                           Stack     *stk,
                           Variables *vars)
@@ -28,25 +32,21 @@ LexerErrs_t SplitOnLexems(Text      *text,
 
     for (size_t i = 0; i < text->lines_count; i++)
     {
-        printf("%d", i);
+        printf("current line - %d\n", i);
+
         Expr expr;
         expr.string = text->lines_ptr[i];
         expr.pos    = 0;
 
-        #define OP_CTOR(op_code) NodeCtor(nullptr, nullptr, nullptr, kOperator,      op_code)
-        #define NUM_CTOR(val)    NodeCtor(nullptr, nullptr, nullptr, kConstNumber,   val)
-        #define ID_CTOR(pos)     NodeCtor(nullptr, nullptr, nullptr, kIdentificator, pos)
-        #define EOL_CTOR(line)   NodeCtor(nullptr, nullptr, nullptr, kEndOfLine,     line)
-        //       ^--------+
-        //                |
-        //  end of line---+
+    #define OP_CTOR(op_code)         NodeCtor(nullptr, nullptr       ,nullptr, kOperator,      op_code)
+    #define NUM_CTOR(val)            NodeCtor(nullptr, nullptr       ,nullptr, kConstNumber,   val)
+    #define ID_CTOR(pos)             NodeCtor(nullptr, nullptr       ,nullptr, kIdentificator, pos)
 
-        Push(stk, EOL_CTOR(i));
         while (expr.string[expr.pos] != '\0')
         {
             if (GetLexem(stk, &expr, vars) < 0)
             {
-                printf("Syntax error. POS %d\n", expr.pos);
+                printf("Syntax error. POS: %d, LINE: %d\n", expr.pos + 1, i + 1);
                 return kSyntaxError;
             }
         }
@@ -66,45 +66,36 @@ LexerErrs_t SplitOnLexems(Text      *text,
 #define POS      expr->pos
 #define CUR_STR  expr->string + expr->pos
 
+#define D_PR printf("LINE: %d, STRING[%s], POS: %d\n", __LINE__, CUR_STR + POS, POS);
+
 //==============================================================================
 
 static int GetLexem(Stack     *stk,
                     Expr      *expr,
                     Variables *vars)
 {
-        printf("POS %s\n", CUR_STR);
+    SkipExprSpaces(expr);
+
+    TreeNode *node = nullptr;
+
     if (isdigit(CUR_CHAR))
     {
         Push(stk, GetNumber(expr));
     }
-    /*else if (CUR_CHAR == '(')
+    else if (IsOperator(CUR_CHAR))
     {
-        Push(stk, OP_CTOR(kLeftBracket));
-        ++POS;
-    }
-    else if (CUR_CHAR == ')')
-    {
-        printf("huy");
-
-        Push(stk, OP_CTOR(kRightBracket));
-        ++POS;
-    }*/
-    else if (isalpha(CUR_CHAR) || CUR_CHAR == ')' || CUR_CHAR == '(')
-    {
-        printf("POS %s\n", CUR_STR);
-
         TreeNode *node = GetOperation(expr);
-        printf("POINTR 1 %p\n", node);
 
         if (node == nullptr)
         {
             node = GetId(expr, vars);
         }
-        printf("2 POINTR %p, TYPE = %d, \n", node, node->type);
+
         if (node ->type == kIdentificator)
         {
             printf("%s\n", vars->var_array[node->data.variable_pos].id);
         }
+
         if (Push(stk, node) != kStackClear)
         {
             printf("Failed to push");
@@ -186,12 +177,14 @@ static TreeNode *GetId(Expr      *expr,
 
     size_t i = 0;
 
-    while (isalpha(CUR_CHAR))
+    while (isalpha(CUR_CHAR)   ||
+           RusIsalpha(CUR_CHAR))
     {
         var_name[i++] = CUR_CHAR;
 
         ++POS;
     }
+
     var_name[i] = '\0';
 
     int id_pos = SeekVariable(vars, var_name);
@@ -201,7 +194,6 @@ static TreeNode *GetId(Expr      *expr,
     }
 
     SkipExprSpaces(expr);
-    printf("VAR POS %s\n", CUR_STR);
 
     return ID_CTOR(id_pos);
 }
@@ -217,3 +209,22 @@ static void SkipExprSpaces(Expr *expr)
 }
 
 //==============================================================================
+
+static bool RusIsalpha(char c)
+{
+    return (c >= 'à' && c <= 'ÿ') ||
+           (c >= 'À' && c <= 'ß') ||
+           (c == '¸' || c == '¨');
+}
+
+//==============================================================================
+
+static bool IsOperator(char c)
+{
+    return c == '?'      ||
+           c == ';'      ||
+           c == ','      ||
+           RusIsalpha(c) ||
+           isalpha(c);
+
+}

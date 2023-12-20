@@ -93,9 +93,9 @@ TreeErrs_t GraphDumpTree(Tree *tree,
 
     fclose(dot_file);
 
-    //system("iconv -f CP1251 -t UTF-8 tree.dmp.dot > ctree.dmp.dot");
+    system("iconv -f CP1251 -t UTF-8 tree.dmp.dot > ctree.dmp.dot");
 
-    sprintf(cmd_command, "dot -Tsvg tree.dmp.dot -o graphdump%d.svg"
+    sprintf(cmd_command, "dot -Tsvg ctree.dmp.dot -o graphdump%d.svg"
                          , call_count);
 
     system(cmd_command);
@@ -105,7 +105,7 @@ TreeErrs_t GraphDumpTree(Tree *tree,
                       "Called from file: %s\n"
                       "Called from function: %s\n"
                       "Line: %d\n"
-                      "<img height=\"150px\" src=\"graphdump%d.svg\">\n"
+                      "<img height=\"700px\" src=\"graphdump%d.svg\">\n"
                       "-----------------------------------------------------------------\n",
                       __DATE__,
                       __TIME__,
@@ -128,7 +128,7 @@ static void LogPrintTree(TreeNode *node,
     if (node->type == kOperator)
     {
         LOG_PRINT("node%p [style = filled, fillcolor = \"lightgreen\", shape = Mrecord, label = "
-                  "\"data: %s | {type : operator | op_code : %d} | {parent: %p | pointer: %p | left: %p | right: %p} \"]\n",
+                  "\"data: %s | {type : OPERATOR | op_code : %d} | {parent: %p | pointer: %p | left: %p | right: %p} \"]\n",
                   node,
                   NameTable[node->data.key_word_code - 1].key_word,
                   node->data.key_word_code,
@@ -140,7 +140,7 @@ static void LogPrintTree(TreeNode *node,
     else if (node->type == kConstNumber)
     {
         LOG_PRINT("node%p [style = filled, fillcolor = \"lightblue\", shape = Mrecord, label = "
-                  "\"data: %lg | type : const number | {parent: %p | pointer: %p | left: %p | right: %p} \"]\n",
+                  "\"data: %lg | type : CONSTANT | {parent: %p | pointer: %p | left: %p | right: %p} \"]\n",
                   node,
                   node->data.const_val,
                   node->parent,
@@ -151,7 +151,7 @@ static void LogPrintTree(TreeNode *node,
     else if (node->type == kIdentificator)
     {
         LOG_PRINT("node%p [style = filled, fillcolor = \"pink\", shape = Mrecord, label = "
-                  "\"data: %d | type : variable | {parent: %p | pointer: %p | left: %p | right: %p} \"]\n",
+                  "\"data: %d | type : VAR | {parent: %p | pointer: %p | left: %p | right: %p} \"]\n",
                   node,
                   node->data.variable_pos,
                   node->parent,
@@ -159,11 +159,12 @@ static void LogPrintTree(TreeNode *node,
                   node->left,
                   node->right);
     }
-    else if (node->type == kEndOfLine)
+    else if (node->type == kVarDecl)
     {
-        LOG_PRINT("node%p [style = filled, fillcolor = \"pink\", shape = Mrecord, label = "
-                  "\"data: ; | type : END OF LINE | {parent: %p | pointer: %p | left: %p | right: %p} \"]\n",
+        LOG_PRINT("node%p [style = filled, fillcolor = \"orange\", shape = Mrecord, label = "
+                  "\"VAR POS: %d | type : VAR DECLARATION | {parent: %p | pointer: %p | left: %p | right: %p} \"]\n",
                   node,
+                  node->data.variable_pos,
                   node->parent,
                   node,
                   node->left,

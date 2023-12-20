@@ -342,7 +342,7 @@ void StackDump(const Stack *stk, LogInfo info)
                     {
                         case kOperator:
                         {
-                            fprintf(LogFile, "\t\t +---->op - \"%s\"\n\n", NameTable[stk->stack_data.data[i]->data.key_word_code - 1]);
+                            fprintf(LogFile, "\t\t +---->op - \"%s\"\n\n", NameTable[stk->stack_data.data[i]->data.key_word_code - 1].key_word);
 
                             break;
                         }
@@ -357,13 +357,6 @@ void StackDump(const Stack *stk, LogInfo info)
                         case kConstNumber:
                         {
                             fprintf(LogFile, "\t\t +---->const number - %lg\n\n", stk->stack_data.data[i]->data.const_val);
-
-                            break;
-                        }
-
-                        case kEndOfLine:
-                        {
-                            fprintf(LogFile, "\t\t +---->EOL - %d\n\n", stk->stack_data.data[i]->data.variable_pos);
 
                             break;
                         }

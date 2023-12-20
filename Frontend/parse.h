@@ -20,4 +20,6 @@ TreeNode *GetId(Variables *vars, Stack *stk, size_t *iter);
 
 TreeNode *GetA(Variables *vars, Stack *stk, size_t *iter);
 
+TreeNode *GetCode(Variables *vars, Stack *stk, size_t *iter);
+
 #endif

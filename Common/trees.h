@@ -25,8 +25,6 @@ struct Variables
     size_t var_count;
 };
 
-
-
 typedef double NumType_t;
 
 typedef enum
@@ -45,10 +43,11 @@ typedef enum
 
 union NodeData
 {
-    NumType_t const_val;
-    KeyCode_t key_word_code;
-    size_t variable_pos;
-    size_t line_number;
+    NumType_t   const_val;
+    KeyCode_t   key_word_code;
+    size_t      variable_pos;
+    size_t      line_number;
+    const char *id;
 };
 
 struct TreeNode
@@ -98,6 +97,7 @@ TreeNode *NodeCtor(TreeNode         *parent_node,
 TreeErrs_t TreeDtor(TreeNode *root);
 
 TreeErrs_t PrintTreeInFile(Tree       *tree,
+                           Variables  *vars,
                            const char *file_name);
 
 TreeErrs_t ReadLanguageElemsOutOfFile(LanguageElems *l_elems,

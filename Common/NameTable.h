@@ -3,41 +3,50 @@
 
 typedef enum
 {
-    kOperator      = 1,
-    kConstNumber   = 2,
-    kIdentificator = 3,
-    kEndOfLine     = 4
+    kOperator       = 1,
+    kConstNumber    = 2,
+    kIdentificator  = 3,
+    kFuncDef        = 4,
+    kFuncParameters = 5,
+    kVarDecl        = 6,
 } ExpressionType_t;
 
 
 typedef enum
 {
-    kNotAnOperation = 0,
-    kAdd            = 1,  // +
-    kSub            = 2,  // -
-    kMult           = 3,  // *
-    kDiv            = 4,  // /
-    kSin            = 5,  // sin
-    kCos            = 6,  // cos
-    kFloor          = 7,  // floor
-    kDiff           = 8,  // diff
-    kSqrt           = 9,  // sqrt
-    kIf             = 10, // if
-    kWhile          = 11, // while
-    kAssign         = 12, // =
-    kMore           = 13, // >
-    kLess           = 14, // <
-    kAnd            = 15, // &&
-    kOr             = 16, // ||
-    kMoreOrEqual    = 17, // >=
-    kLessOrEqual    = 18, // <=
-    kEqual          = 19, // ==
-    kNotEqual       = 20, // !=
-    kBreak          = 21, // break
-    kContinue       = 22, // continue
-    kReturn         = 23, // return
-    kLeftBracket    = 24,
-    kRightBracket   = 25,
+    kNotAnOperation   = 0,
+    kAdd              = 1,  // +
+    kSub              = 2,  // -
+    kMult             = 3,  // *
+    kDiv              = 4,  // /
+    kSin              = 5,  // sin
+    kCos              = 6,  // cos
+    kFloor            = 7,  // floor
+    kDiff             = 8,  // diff
+    kSqrt             = 9,  // sqrt
+    kIf               = 10, // if
+    kWhile            = 11, // while
+    kAssign           = 12, // =
+    kMore             = 13, // >
+    kLess             = 14, // <
+    kAnd              = 15, // &&
+    kOr               = 16, // ||
+    kMoreOrEqual      = 17, // >=
+    kLessOrEqual      = 18, // <=
+    kEqual            = 19, // ==
+    kNotEqual         = 20, // !=
+    kBreak            = 21, // break
+    kContinue         = 22, // continue
+    kReturn           = 23, // return
+    kLeftBracket      = 24, //не в стандарте, но и в дереве их нет
+    kRightBracket     = 25, //не в стандарте, но и в дереве их нет
+    kLeftZoneBracket  = 26, //не в стандарте, но и в дереве их нет
+    kRightZoneBracket = 27, //не в стандарте, но и в дереве их нет
+    kEnumOp           = 28,
+    kEndOfLine        = 29,
+    kDoubleType       = 30,
+    kNextTransUnit    = 41,
+
 } KeyCode_t;
 
 struct KeyWord
@@ -49,31 +58,36 @@ struct KeyWord
 
 static const KeyWord NameTable[]=
 {
-    "plus"      ,kAdd,         4,
-    "minus"     ,kSub,         5,
-    "mult"      ,kMult,        4,
-    "div"       ,kDiv,         3,
-    "sin"       ,kSin,         3,
-    "cos"       ,kCos,         3,
-    "floor"     ,kFloor,       5,
-    "diff"      ,kDiff,        4,
-    "sqrt"      ,kSqrt,        4,
-    "if"        ,kIf,          2,
-    "while"     ,kWhile,       5,
-    "="         ,kAssign,      1,
-    ">"         ,kMore,        1,
-    "<"         ,kLess,        1,
-    "and"       ,kAnd,         3,
-    "or"        ,kOr,          2,
-    ">="        ,kMoreOrEqual, 2,
-    "<="        ,kLessOrEqual, 2,
-    "=="        ,kEqual,       2,
-    "!="        ,kNotEqual,    2,
-    "break"     ,kBreak,       5,
-    "continue"  ,kContinue,    8,
-    "return"    ,kReturn,      6,
-    "("         ,kLeftBracket, 1,
-    ")"         ,kRightBracket,1,
+    "лежать+сосать"         ,kAdd,              13,
+    "потерял_ранг"          ,kSub,              12,
+    "посадить_на_zxc"       ,kMult,             15,
+    "тычка"                 ,kDiv,              5,
+    "углы_вымеряет"         ,kSin,              13,
+    "это_преломления_лучей" ,kCos,              21,
+    "убей_себя_блять"       ,kFloor,            15,
+    "реквием"               ,kDiff,             7,
+    "трент_ультанул"        ,kSqrt,             14,
+    "???"                   ,kIf,               3,
+    "while"                 ,kWhile,            5,
+    "ты"                    ,kAssign,           2,
+    "больше"                ,kMore,             6,
+    "меньше"                ,kLess,             6,
+    "и"                     ,kAnd,              1,
+    "или"                   ,kOr,               3,
+    "не_больше"             ,kMoreOrEqual,      9,
+    "не_меньше"             ,kLessOrEqual,      9,
+    "ты_точно"              ,kEqual,            8,
+    "ты_не"                 ,kNotEqual,         5,
+    "съеби_нахуй!"          ,kBreak,            12,
+    "иди_блять!"            ,kContinue,         10,
+    "верни_курьера_блять"   ,kReturn,           19,
+    "мать"                  ,kLeftBracket,      4,
+    "ебал"                  ,kRightBracket,     4,
+    "стань"                 ,kLeftZoneBracket,  5,
+    "мид"                   ,kRightZoneBracket, 3,
+    ","                     ,kEnumOp,           1,
+    ";"                     ,kEndOfLine,        1,
+    "долбоеб"               ,kDoubleType,       7,
 };
 
 static const size_t kKeyWordCount = sizeof(NameTable) / sizeof(KeyWord);

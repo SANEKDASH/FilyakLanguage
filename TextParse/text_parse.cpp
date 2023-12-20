@@ -200,7 +200,6 @@ void FillText(Text *text)
 void PrintTextInFile(FILE *output_file,
                      Text *text)
 {
-    printf("l  - %d\n", text->lines_count);
     for (size_t i = 0; i < text->lines_count; i++)
     {
         fprintf(output_file, "%s\n", *(text->lines_ptr + i));

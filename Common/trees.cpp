@@ -22,6 +22,7 @@ static TreeNode *CreateNodeFromBrackets(Variables     *vars,
                                         size_t        *iterator);
 
 static TreeErrs_t PrintTree(const TreeNode *root,
+                            Variables      *vars,
                             FILE           *output_file);
 
 static TreeErrs_t ReallocVarArray(Variables *vars,
@@ -117,9 +118,6 @@ TreeErrs_t TreeCtor(Tree *tree)
 
     tree->root = nullptr;
 
-    tree->root->left  = nullptr;
-    tree->root->right = nullptr;
-
     return kTreeSuccess;
 }
 
@@ -174,9 +172,9 @@ TreeNode *NodeCtor(TreeNode         *parent_node,
     {
         node->data.const_val = data;
     }
-    else if (type == kEndOfLine)
+    else if (type == kVarDecl)
     {
-        node->data.line_number = data;
+        node->data.variable_pos = data;
     }
     else
     {
@@ -197,9 +195,12 @@ TreeNode *NodeCtor(TreeNode         *parent_node,
 //==============================================================================
 
 static TreeErrs_t PrintTree(const TreeNode *root,
+                            Variables      *vars,
                             FILE           *output_file)
 {
     CHECK(output_file);
+
+    fprintf(output_file, "( ");
 
     if (root == nullptr)
     {
@@ -208,34 +209,46 @@ static TreeErrs_t PrintTree(const TreeNode *root,
         return kTreeSuccess;
     }
 
-    if (root->type != kConstNumber)
+    if (root->type == kOperator)
     {
-        fprintf(output_file, "( ");
+        fprintf(output_file,
+                "%d %d ",
+                kOperator,
+                root->data.key_word_code);
+    }
+    else if (root->type == kConstNumber)
+    {
+        fprintf(output_file,
+                "%d %lg ",
+                kConstNumber,
+                root->data.const_val);
+    }
+    else if (root->type == kIdentificator)
+    {
+        fprintf(output_file,
+                "%d %s ",
+                kIdentificator,
+                vars->var_array[root->data.variable_pos].id);
+    }
+    else if (root->type == kEndOfLine)
+    {
+        fprintf(output_file,
+                "%d %d ",
+                kEndOfLine,
+                root->data.line_number);
     }
 
     if (root->left != nullptr)
     {
-        PrintTree(root->left, output_file);
-    }
-
-    if (root->type == kOperator)
-    {
-        fprintf(output_file, "%s ", NameTable[root->data.key_word_code].key_word);
-    }
-    else if (root->type == kConstNumber)
-    {
-        fprintf(output_file, "%lg ", root->data.const_val);
+        PrintTree(root->left, vars, output_file);
     }
 
     if (root->right != nullptr)
     {
-        PrintTree(root->right, output_file);
+        PrintTree(root->right, vars, output_file);
     }
 
-    if (root->type != kConstNumber)
-    {
-        fprintf(output_file, ") ");
-    }
+    fprintf(output_file, ") ");
 
     return kTreeSuccess;
 }
@@ -243,6 +256,7 @@ static TreeErrs_t PrintTree(const TreeNode *root,
 //==============================================================================
 
 TreeErrs_t PrintTreeInFile(Tree       *tree,
+                           Variables  *vars,
                            const char *file_name)
 {
     CHECK(tree);
@@ -254,7 +268,7 @@ TreeErrs_t PrintTreeInFile(Tree       *tree,
         return kFailedToOpenFile;
     }
 
-    PrintTree(tree->root, output_file);
+    PrintTree(tree->root, vars, output_file);
 
     fclose(output_file);
 
@@ -303,21 +317,28 @@ static TreeNode* CreateNodeFromText(Variables     *vars,
 {
     CHECK(iterator);
     CHECK(text);
-
     TreeNode *node = nullptr;
+
 
     if (*text->lines_ptr[*iterator] == '(')
     {
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+
         ++(*iterator);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
 
         ExpressionType_t type = (ExpressionType_t) atoi(text->lines_ptr[*iterator]);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
 
         ++(*iterator);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
 
         switch (type)
         {
             case kConstNumber:
             {
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+
                 node = NodeCtor(nullptr,
                                 nullptr,
                                 nullptr,
@@ -328,6 +349,8 @@ static TreeNode* CreateNodeFromText(Variables     *vars,
 
             case kOperator:
             {
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+
                 node = NodeCtor(nullptr,
                                 nullptr,
                                 nullptr,
@@ -338,6 +361,8 @@ static TreeNode* CreateNodeFromText(Variables     *vars,
 
             case kIdentificator:
             {
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+
                 int pos = SeekVariable(vars, text->lines_ptr[*iterator]);
 
                 if (pos < 0)
@@ -353,30 +378,26 @@ static TreeNode* CreateNodeFromText(Variables     *vars,
                 break;
             }
 
-            case kEndOfLine:
-            {
-                node = NodeCtor(nullptr,
-                                nullptr,
-                                nullptr,
-                                kEndOfLine,
-                                atoi(text->lines_ptr[*iterator]));
-
-                break;
-            }
-
             default:
             {
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+
                 printf("CreateNodeFromText() -> KAVO? 1000-7 ???");
 
                 break;
             }
         }
     }
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
 
     ++(*iterator);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
 
     node->left =  CreateNodeFromBrackets(vars, text, iterator);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+
     node->right = CreateNodeFromBrackets(vars, text, iterator);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
 
     if (*text->lines_ptr[*iterator] != ')')
     {
@@ -400,16 +421,16 @@ static TreeNode *CreateNodeFromBrackets(Variables     *vars,
     {
         node = CreateNodeFromText(vars, text, iterator);
 
+        ++(*iterator);
+
         if (node == nullptr)
         {
             return nullptr;
         }
-
-        ++(*iterator);
     }
     else if (*text->lines_ptr[*iterator] != ')')
     {
-        if (strcmp(text->lines_ptr[*iterator], "null") == 0)
+        if (strcmp(text->lines_ptr[*iterator], "nil") == 0)
         {
             ++(*iterator);
 
