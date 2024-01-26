@@ -16,7 +16,6 @@ static bool IsBinaryOpLower(KeyCode_t op_code);
 static bool IsType         (KeyCode_t op_code);
 static bool IsFunc         (KeyCode_t op_code);
 
-
 static void SkipSpaces(Expr *expr);
 
 static TreeNode *GetDeclaration  (Variables *vars, Stack *stk, size_t *iter);
@@ -83,7 +82,7 @@ TreeNode *GetL(Variables *vars, Stack *stk, size_t *iter)
         {
             cur_op = OP_CTOR(kEndOfLine);
 
-            cur_op->left = GetConditionalOp(vars, stk, iter);
+            cur_op->left  = GetConditionalOp(vars, stk, iter);
 
             cur_op->right = GetL(vars, stk, iter);
 
@@ -104,10 +103,22 @@ TreeNode *GetL(Variables *vars, Stack *stk, size_t *iter)
                 return next_func;
             }
         }
+        else if (CUR_NODE_DATA == kReturn)
+        {
+    DPR
+            cur_op = CUR_NODE;
+            ++(*iter);
+    DPR
+            cur_op->right = GetE(vars, stk, iter);
+        }
+        else
+        {
+            cur_op = GetE(vars, stk, iter);
+        }
     }
     else if (CUR_NODE_TYPE  == kIdentificator)
     {
-        if (CUR_ID_STATE == true && CUR_ID_TYPE == kVar)
+        if (CUR_ID_TYPE == kVar)
         {
             if (NEXT_NODE_TYPE == kOperator &&
                 NEXT_NODE_DATA == kAssign)
@@ -119,6 +130,10 @@ TreeNode *GetL(Variables *vars, Stack *stk, size_t *iter)
 
                 cur_op->left = GetE(vars, stk, iter);
             }
+        }
+        else if (CUR_ID_TYPE == kFunc)
+        {
+            cur_op = GetId(vars, stk, iter);
         }
         else
         {
@@ -135,7 +150,6 @@ TreeNode *GetL(Variables *vars, Stack *stk, size_t *iter)
         }
     }
 
-    //это условие явно поменяется в скором будущем(хуй знает)
     if (*iter < stk->stack_data.size)
     {
         if (CUR_NODE_TYPE == kOperator &&
@@ -308,33 +322,46 @@ TreeNode *GetId(Variables *vars, Stack *stk, size_t *iter)
     if (CUR_NODE_TYPE == kIdentificator)
     {
         TreeNode *identificator = CUR_NODE;
-
+DPR
         ++*iter;
 
-        /*if (CUR_NODE_TYPE == kOperator &&
+        if (CUR_NODE_TYPE == kOperator &&
             CUR_NODE_DATA == kLeftBracket)
         {
-            //добавить параметры
+            if (vars->var_array[identificator->data.variable_pos].declaration_state == true &&
+                vars->var_array[identificator->data.variable_pos].id_type           == kFunc)
+            {
+            DPR
+                TreeNode *call = NodeCtor(nullptr, nullptr, nullptr, kCall, 0);
+            DPR
+//params
+                call->left = nullptr;
+            DPR
+                call->right = identificator;
+                *iter += 2;
 
-            TreeNode *call = NodeCtor(nullptr, nullptr, nullptr, kCall, 0);
+                return call;
+            }
+            else
+            {
+                printf(">>MISSING FUNC IDENTIFICATOR: \"%s\"\n",
+                       vars->var_array[identificator->data.variable_pos].id);
 
-            call->left = nullptr;
-
-            call->right = identificator;
-
-            *iter += 2;
-
-            return call;
-        }*/
+                return nullptr;
+            }
+        }
 
         return identificator;
     }
     else if (CUR_NODE_TYPE == kOperator &&
              IsFunc(CUR_NODE_DATA))
     {
+    DPR
         TreeNode *func = CUR_NODE;
         ++(*iter);
         func->right = GetP(vars, stk, iter);
+
+        return func;
     }
 
     return nullptr;
@@ -413,17 +440,19 @@ static bool IsFunc(KeyCode_t op_code)
            op_code == kFloor ||
            op_code == kDiff  ||
            op_code == kSqrt  ||
-           op_code == kPrint;
+           op_code == kPrint ||
+           op_code == kScan;
 }
 
 //==============================================================================
 
 static TreeNode *GetDeclaration(Variables *vars, Stack *stk, size_t *iter)
 {
-    TreeNode *decl = nullptr;
-    TreeNode *type = CUR_NODE;
+    TreeNode *decl       = nullptr;
+    TreeNode *type       = CUR_NODE;
 
     ++(*iter);
+
 
     if (CUR_NODE_TYPE == kIdentificator)
     {
@@ -448,23 +477,48 @@ static TreeNode *GetDeclaration(Variables *vars, Stack *stk, size_t *iter)
             decl->right = params;
 
             vars->var_array[identificator->data.variable_pos].declaration_state = true;
-            vars->var_array[identificator->data.variable_pos].id_type              = kFunc;
+            vars->var_array[identificator->data.variable_pos].id_type           = kFunc;
 
             return decl;
         }
         else
         {
-            vars->var_array[identificator->data.variable_pos].declaration_state = true;
-            vars->var_array[identificator->data.variable_pos].id_type              = kVar;
-
             decl = NodeCtor(nullptr,
                             type,
                             nullptr,
                             kVarDecl,
                             identificator->data.variable_pos);
-                            //+инициализация при объявлении
-        }
 
+            TreeNode *assign = nullptr;
+
+            if (CUR_NODE_TYPE == kOperator &&
+                CUR_NODE_DATA == kAssign)
+            {
+                assign = CUR_NODE;
+
+                ++(*iter);
+
+                assign->left  = GetE(vars, stk, iter);
+                assign->right = NodeCtor(nullptr,
+                                         nullptr,
+                                         nullptr,
+                                         kIdentificator,
+                                         identificator->data.variable_pos);
+            }
+            else
+            {
+                assign = NodeCtor(nullptr,
+                         nullptr,
+                         nullptr,
+                         kIdentificator,
+                         identificator->data.variable_pos);
+            }
+
+            decl->right = assign;
+
+            vars->var_array[identificator->data.variable_pos].declaration_state = true;
+            vars->var_array[identificator->data.variable_pos].id_type           = kVar;
+        }
     }
 
     DPR

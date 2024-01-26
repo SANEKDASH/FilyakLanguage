@@ -97,6 +97,7 @@ static int GetLexem(Stack     *stk,
     }
     else
     {
+        printf("uncknown symbol : [%c]\n", CUR_CHAR);
         return -1;
     }
 
@@ -147,7 +148,9 @@ static TreeNode *GetOperation(Expr *expr)
                     NameTable[i].word_len) == 0)
         {
             node = OP_CTOR(i + 1);
+
             POS += NameTable[i].word_len;
+
             if (i+1 == kRightBracket)
             {
                 printf("mother was fucked\n");
@@ -176,8 +179,9 @@ static TreeNode *GetId(Expr      *expr,
 
     size_t i = 0;
 
-    while (isalpha(CUR_CHAR)   ||
-           RusIsalpha(CUR_CHAR))
+    while (isalpha   (CUR_CHAR)    ||
+           RusIsalpha(CUR_CHAR)    ||
+                      CUR_CHAR == '_')
     {
         var_name[i++] = CUR_CHAR;
 
@@ -187,10 +191,12 @@ static TreeNode *GetId(Expr      *expr,
     var_name[i] = '\0';
 
     int id_pos = SeekVariable(vars, var_name);
+
     if (id_pos < 0)
     {
         id_pos = AddVar(vars, strdup(var_name));
     }
+
     SkipExprSpaces(expr);
 
     return ID_CTOR(id_pos);
@@ -210,9 +216,9 @@ static void SkipExprSpaces(Expr *expr)
 
 static bool RusIsalpha(char c)
 {
-    return (c >= 'à' && c <= 'ÿ') ||
-           (c >= 'À' && c <= 'ß') ||
-           (c == '¸' || c == '¨');
+    return (c >= 'ï¿½' && c <= 'ï¿½') ||
+           (c >= 'ï¿½' && c <= 'ï¿½') ||
+           (c == 'ï¿½' || c == 'ï¿½');
 }
 
 //==============================================================================
@@ -222,6 +228,7 @@ static bool IsOperator(char c)
     return c == '?'      ||
            c == ';'      ||
            c == ','      ||
+           c == '_'      ||
            RusIsalpha(c) ||
            isalpha(c);
 

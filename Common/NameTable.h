@@ -77,7 +77,7 @@ static const KeyWord NameTable[]=
     "или"                   ,kOr,               3,
     "не_больше"             ,kMoreOrEqual,      9,
     "не_меньше"             ,kLessOrEqual,      9,
-    "ты_точно"              ,kEqual,            8,
+    "точно"                 ,kEqual,            5,
     "ты_не"                 ,kNotEqual,         5,
     "съеби_нахуй!"          ,kBreak,            12,
     "иди_блять!"            ,kContinue,         10,
@@ -89,7 +89,10 @@ static const KeyWord NameTable[]=
     ","                     ,kEnumOp,           1,
     ";"                     ,kEndOfLine,        1,
     "долбоеб"               ,kDoubleType,       7,
+    "пишу_твоей_матери"     ,kPrint,            17,
+    "скажи_мне"             ,kScan,             9
 };
+
 
 static const size_t kKeyWordCount = sizeof(NameTable) / sizeof(KeyWord);
 
