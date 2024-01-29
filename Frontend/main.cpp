@@ -9,6 +9,7 @@ int main(int argc, char *argv[])
 {
     InitTreeGraphDump();
 
+
     LanguageElems l_elems = {0};
 
     LanguageElemsInit(&l_elems);
@@ -20,9 +21,10 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    l_elems.syntax_tree.root = GetG(&l_elems.vars, argv[1]);
+    l_elems.syntax_tree.root = GetSyntaxTree(&l_elems.vars, argv[1]);
 
     GRAPH_DUMP_TREE(&l_elems.syntax_tree);
+    printf("GUY");
 
     printf("TREE ROOT %p\n", l_elems.syntax_tree.root);
 
@@ -33,6 +35,8 @@ int main(int argc, char *argv[])
                     "tree_save.txt");
 
     LanguageElemsDtor(&l_elems);
+
+    printf(">>Successfuly compiled file : \"%s\".", argv[1]);
 
     return 0;
 }

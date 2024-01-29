@@ -4,22 +4,18 @@
 #include "../Common/trees.h"
 #include "../Stack/stack.h"
 
-TreeNode *GetG(Variables *vars, const char *file_name);
+TreeNode *GetSyntaxTree(Variables *vars, const char *file_name);
 
-TreeNode *GetL(Variables *vars, Stack *stk, size_t *iter);
+TreeNode *GetAddExpression(Variables *vars, Stack *stk, size_t *iter);
 
-TreeNode *GetE(Variables *vars, Stack *stk, size_t *iter);
+TreeNode *GetExpression(Variables *vars, Stack *stk, size_t *iter);
 
-TreeNode *GetP(Variables *vars, Stack *stk, size_t *iter);
+TreeNode *GetMultExpression(Variables *vars, Stack *stk, size_t *iter);
 
-TreeNode *GetT(Variables *vars, Stack *stk, size_t *iter);
+TreeNode* GetConstant(Variables *vars, Stack *stk, size_t *iter);
 
-TreeNode* GetN(Variables *vars, Stack *stk, size_t *iter);
+TreeNode *GetIdentificator(Variables *vars, Stack *stk, size_t *iter);
 
-TreeNode *GetId(Variables *vars, Stack *stk, size_t *iter);
-
-TreeNode *GetA(Variables *vars, Stack *stk, size_t *iter);
-
-TreeNode *GetCode(Variables *vars, Stack *stk, size_t *iter);
+TreeNode *GetPrimaryExpression(Variables *vars, Stack *stk, size_t *iter);
 
 #endif

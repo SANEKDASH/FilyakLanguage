@@ -165,41 +165,66 @@ TreeNode *NodeCtor(TreeNode         *parent_node,
 
     node->type = type;
 
-    if (type == kOperator)
+    switch (type)
     {
-        node->data.key_word_code = (KeyCode_t) data;
-    }
-    else if (type == kIdentificator)
-    {
-        node->data.variable_pos = data;
-    }
-    else if (type == kConstNumber)
-    {
-        node->data.const_val = data;
-    }
-    else if (type == kVarDecl)
-    {
-        node->data.variable_pos = data;
-    }
-    else if (type == kFuncDef)
-    {
-        node->data.variable_pos = data;
-    }
-    else if (type == kParamsNode)
-    {
-        node->data.key_word_code = (KeyCode_t) data;
-    }
-    else if (type = kCall)
-    {
-        //do nothing
-    }
-    else
-    {
-        printf("NodeCtor() unknown type %d\n", type);
+        case kOperator:
+        {
+           node->data.key_word_code = (KeyCode_t) data;
 
-        free(node);
+            break;
+        }
 
-        return nullptr;
+        case kIdentificator:
+        {
+            node->data.variable_pos = data;
+
+            break;
+        }
+
+        case kConstNumber:
+        {
+            node->data.const_val = data;
+
+            break;
+        }
+
+        case kVarDecl:
+        {
+            node->data.variable_pos = data;
+
+            break;
+        }
+
+        case kFuncDef:
+        {
+            node->data.variable_pos = data;
+
+            break;
+        }
+
+        case kParamsNode:
+        {
+            node->data.key_word_code = (KeyCode_t) data;
+
+            break;
+        }
+
+        case kCall:
+        {
+            //do nothing
+
+            break;
+        }
+
+        default:
+        {
+            printf("NodeCtor() unknown type %d\n", type);
+
+            free(node);
+
+            return nullptr;
+        }
+
     }
 
     node->left  = left;

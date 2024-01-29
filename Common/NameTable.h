@@ -16,38 +16,44 @@ typedef enum
 typedef enum
 {
     kNotAnOperation   = 0,
-    kAdd              = 1,  // +
-    kSub              = 2,  // -
-    kMult             = 3,  // *
-    kDiv              = 4,  // /
-    kSin              = 5,  // sin
-    kCos              = 6,  // cos
-    kFloor            = 7,  // floor
-    kDiff             = 8,  // diff
-    kSqrt             = 9,  // sqrt
-    kIf               = 10, // if
-    kWhile            = 11, // while
-    kAssign           = 12, // =
-    kMore             = 13, // >
-    kLess             = 14, // <
-    kAnd              = 15, // &&
-    kOr               = 16, // ||
-    kMoreOrEqual      = 17, // >=
-    kLessOrEqual      = 18, // <=
-    kEqual            = 19, // ==
-    kNotEqual         = 20, // !=
-    kBreak            = 21, // break
-    kContinue         = 22, // continue
-    kReturn           = 23, // return
-    kLeftBracket      = 24, //íå â ñòàíäàðòå, íî è â äåðåâå èõ íåò
-    kRightBracket     = 25, //íå â ñòàíäàðòå, íî è â äåðåâå èõ íåò
-    kLeftZoneBracket  = 26, //íå â ñòàíäàðòå, íî è â äåðåâå èõ íåò
-    kRightZoneBracket = 27, //íå â ñòàíäàðòå, íî è â äåðåâå èõ íåò
-    kEnumOp           = 28,
-    kEndOfLine        = 29,
-    kDoubleType       = 30,
-    kPrint            = 31,
-    kScan             = 32,
+    kLeftBracket      = 1, //˜˜ ˜ ˜˜˜˜˜˜˜˜˜, ˜˜ ˜ ˜ ˜˜˜˜˜˜ ˜˜ ˜˜˜
+    kRightBracket     = 2, //˜˜ ˜ ˜˜˜˜˜˜˜˜˜, ˜˜ ˜ ˜ ˜˜˜˜˜˜ ˜˜ ˜˜˜
+    kLeftZoneBracket  = 3, //˜˜ ˜ ˜˜˜˜˜˜˜˜˜, ˜˜ ˜ ˜ ˜˜˜˜˜˜ ˜˜ ˜˜˜
+    kRightZoneBracket = 4, //˜˜ ˜ ˜˜˜˜˜˜˜˜˜, ˜˜ ˜ ˜ ˜˜˜˜˜˜ ˜˜ ˜˜˜
+    kDoubleType       = 5,
+
+    kIf               = 11, // if
+    kWhile            = 12, // while
+    kAssign           = 13, // =
+
+    kSin              = 21,  // sin
+    kCos              = 22,  // cos
+    kFloor            = 23,  // floor
+    kAdd              = 24,  // +
+    kSub              = 25,  // -
+    kMult             = 26,  // *
+    kDiv              = 27,  // /
+    kDiff             = 28,  // diff
+    kSqrt             = 29,  // sqrt
+
+    kEqual            = 31, // ==
+    kLess             = 32, // <
+    kMore             = 33, // >
+    kLessOrEqual      = 34, // <=
+    kMoreOrEqual      = 35, // >=
+    kNotEqual         = 36, // !=
+    kAnd              = 37, // &&
+    kOr               = 38, // ||
+
+    kEndOfLine        = 41,
+    kEnumOp           = 42,
+
+    kPrint            = 62,
+    kScan             = 61,
+
+    kBreak            = 72, // break
+    kContinue         = 73, // continue
+    kReturn           = 71, // return
 } KeyCode_t;
 
 struct KeyWord

@@ -120,6 +120,24 @@ TreeErrs_t GraphDumpTree(Tree *tree,
     return kTreeSuccess;
 }
 
+
+//================================================================================================
+
+static size_t GetNameTablePos(size_t code)
+{
+    for (size_t i = 0; i < kKeyWordCount; i++)
+    {
+        if (NameTable[i].key_code == code)
+        {
+            return i;
+        }
+    }
+
+    printf("GetNameTablePos(): could not find suzh code\n");
+
+    return 0;
+}
+
 //================================================================================================
 
 static void LogPrintTree(TreeNode *node,
@@ -127,10 +145,12 @@ static void LogPrintTree(TreeNode *node,
 {
     if (node->type == kOperator)
     {
+        size_t pos = GetNameTablePos(node->data.key_word_code);
+
         LOG_PRINT("node%p [style = filled, fillcolor = \"lightgreen\", shape = Mrecord, label = "
                   "\"op: %s | {type : OPERATOR | op_code : %d} | {parent: %p | pointer: %p | left: %p | right: %p} \"]\n",
                   node,
-                  NameTable[node->data.key_word_code - 1].key_word,
+                  NameTable[pos].key_word,
                   node->data.key_word_code,
                   node->parent,
                   node,

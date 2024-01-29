@@ -2,48 +2,20 @@ jmp аганим
 
 
 
-дискриминант_считай:
-push [1]
-push [1]
-mult
-
-push [2]
-push [3]
-mult
-
-push 4
-mult
-
-sub
-
-pop rax
-
-ret
-
-
-
 аганим:
 in
-pop [2]
-in
 pop [1]
-in
-pop [3]
-push [2]
-out
 push [1]
-out
-push [3]
-out
-call дискриминант_считай
-push rax
-pop [5]
-push [5]
-sqrt
+push 10
+sub
 
-pop [5]
-push [5]
 out
 
 
 hlt
+
+
+
+дискриминант:
+
+ret

@@ -1,64 +1,64 @@
 
 --------------------------------------------------
-TXLib предупреждает:
+TXLib пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
 
-Программа: D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe,
+пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ: D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe,
 
-ВНЕЗАПНО: Нарушение доступа к памяти.
+пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ: пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
 
-#1: Исключение EXCEPTION_ACCESS_VIOLATION (0xC0000005) при вяполнении кода по адресу 0x0041DABD в функции GetL() в файле D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp на строке 145. Попятка записатя данняе по адресу 0x00000010 в модуле D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe. Спасибо _txVectoredExceptionHandler(), что сообщил. Люблю его <3
+#1: пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ EXCEPTION_ACCESS_VIOLATION (0xC0000005) пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 0x0041DABD пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ GetTranslationUnit() пїЅ пїЅпїЅпїЅпїЅпїЅ D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 145. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 0x00000010 пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ _txVectoredExceptionHandler(), пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ <3
 
-#1: TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400], Instance: 0x004FB2FC (32-bit), Flags: Cmdre0, Thread: 0x6FAC (Main), GetLastError(): 183 (Невозможно создать файл, так как он уже существует). 
+#1: TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400], Instance: 0x004FB2FC (32-bit), Flags: Cmdre0, Thread: 0x6FAC (Main), GetLastError(): 183 (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ).
 
 --------------------------------------------------
-Стек вязовов:
+пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
 
-# 0 0x0041DABD in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetL() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (145):
+# 0 0x0041DABD in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetTranslationUnit() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (145):
 
     143:     else
     144:     {
-=>  145:         cur_op->left = GetE(vars, stk, iter);
-    146: 
+=>  145:         cur_op->left = GetAddExpression(vars, stk, iter);
+    146:
     147:         if (cur_op->left == nullptr)
 
-# 1 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetL() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
+# 1 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetTranslationUnit() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
 
      99:                 next_func->left  = cur_op;
-    100: 
-=>  101:                 next_func->right = GetL(vars, stk, iter);
-    102: 
+    100:
+=>  101:                 next_func->right = GetTranslationUnit(vars, stk, iter);
+    102:
     103:                 return next_func;
 
-# 2 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetL() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
+# 2 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetTranslationUnit() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
 
      99:                 next_func->left  = cur_op;
-    100: 
-=>  101:                 next_func->right = GetL(vars, stk, iter);
-    102: 
+    100:
+=>  101:                 next_func->right = GetTranslationUnit(vars, stk, iter);
+    102:
     103:                 return next_func;
 
-# 3 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetL() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
+# 3 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetTranslationUnit() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
 
      99:                 next_func->left  = cur_op;
-    100: 
-=>  101:                 next_func->right = GetL(vars, stk, iter);
-    102: 
+    100:
+=>  101:                 next_func->right = GetTranslationUnit(vars, stk, iter);
+    102:
     103:                 return next_func;
 
-# 4 0x0041D69C in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetG() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (41):
+# 4 0x0041D69C in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetSyntaxTree() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (41):
 
      39:     SplitOnLexems(&program, &lexems, vars);
      40:     size_t i = 0;
-=>   41:     TreeNode *node = GetL(vars, &lexems, &i);;
+=>   41:     TreeNode *node = GetTranslationUnit(vars, &lexems, &i);;
      42:     SetParents(node);
-     43: 
+     43:
 
 # 5 0x0041C49B in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: main() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/main.cpp (25):
 
      23:     }
-     24: 
-=>   25:     l_elems.syntax_tree.root = GetG(&l_elems.vars, argv[1]);
-     26: 
+     24:
+=>   25:     l_elems.syntax_tree.root = GetSyntaxTree(&l_elems.vars, argv[1]);
+     26:
      27:     GRAPH_DUMP_TREE(&l_elems.syntax_tree);
 
 --------------------------------------------------
@@ -79,69 +79,69 @@ Directory:	D:\postuplenie\treniruys\FilyakLanguage
 --------------------------------------------------
 
 --------------------------------------------------
-TXLib соболезнует...
+TXLib пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ...
 
-Программа: D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe,
+пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ: D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe,
 
-ВНЕЗАПНО: signal (11, 0x00): SIGSEGV: Доступ по неверному указателю. Ставяте ассертя! 
+пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ: signal (11, 0x00): SIGSEGV: пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ!
 
-Нарушение доступа к памяти.
+пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
 
-#1: Исключение EXCEPTION_ACCESS_VIOLATION (0xC0000005) при вяполнении кода по адресу 0x0041DABD в функции GetL() в файле D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp на строке 145. Попятка записатя данняе по адресу 0x00000010 в модуле D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe. Спасибо _txVectoredExceptionHandler(), что сообщил. Люблю его <3
+#1: пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ EXCEPTION_ACCESS_VIOLATION (0xC0000005) пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 0x0041DABD пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ GetTranslationUnit() пїЅ пїЅпїЅпїЅпїЅпїЅ D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 145. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 0x00000010 пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ _txVectoredExceptionHandler(), пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ <3
 
-С помощяю функции signal() вя можете сами обработатя эту ошибку.
+пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ signal() пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
 
-#2: TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400], Instance: 0x004FB2FC (32-bit), Flags: Cmdre0, Thread: 0x6FAC (Main), GetLastError(): 183 (Невозможно создать файл, так как он уже существует). 
+#2: TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400], Instance: 0x004FB2FC (32-bit), Flags: Cmdre0, Thread: 0x6FAC (Main), GetLastError(): 183 (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ).
 
 --------------------------------------------------
-Стек вязовов:
+пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
 
-# 0 0x0041DABD in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetL() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (145):
+# 0 0x0041DABD in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetTranslationUnit() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (145):
 
     143:     else
     144:     {
-=>  145:         cur_op->left = GetE(vars, stk, iter);
-    146: 
+=>  145:         cur_op->left = GetAddExpression(vars, stk, iter);
+    146:
     147:         if (cur_op->left == nullptr)
 
-# 1 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetL() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
+# 1 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetTranslationUnit() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
 
      99:                 next_func->left  = cur_op;
-    100: 
-=>  101:                 next_func->right = GetL(vars, stk, iter);
-    102: 
+    100:
+=>  101:                 next_func->right = GetTranslationUnit(vars, stk, iter);
+    102:
     103:                 return next_func;
 
-# 2 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetL() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
+# 2 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetTranslationUnit() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
 
      99:                 next_func->left  = cur_op;
-    100: 
-=>  101:                 next_func->right = GetL(vars, stk, iter);
-    102: 
+    100:
+=>  101:                 next_func->right = GetTranslationUnit(vars, stk, iter);
+    102:
     103:                 return next_func;
 
-# 3 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetL() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
+# 3 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetTranslationUnit() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
 
      99:                 next_func->left  = cur_op;
-    100: 
-=>  101:                 next_func->right = GetL(vars, stk, iter);
-    102: 
+    100:
+=>  101:                 next_func->right = GetTranslationUnit(vars, stk, iter);
+    102:
     103:                 return next_func;
 
-# 4 0x0041D69C in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetG() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (41):
+# 4 0x0041D69C in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetSyntaxTree() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (41):
 
      39:     SplitOnLexems(&program, &lexems, vars);
      40:     size_t i = 0;
-=>   41:     TreeNode *node = GetL(vars, &lexems, &i);;
+=>   41:     TreeNode *node = GetTranslationUnit(vars, &lexems, &i);;
      42:     SetParents(node);
-     43: 
+     43:
 
 # 5 0x0041C49B in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: main() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/main.cpp (25):
 
      23:     }
-     24: 
-=>   25:     l_elems.syntax_tree.root = GetG(&l_elems.vars, argv[1]);
-     26: 
+     24:
+=>   25:     l_elems.syntax_tree.root = GetSyntaxTree(&l_elems.vars, argv[1]);
+     26:
      27:     GRAPH_DUMP_TREE(&l_elems.syntax_tree);
 
 --------------------------------------------------
@@ -162,65 +162,65 @@ Directory:	D:\postuplenie\treniruys\FilyakLanguage
 --------------------------------------------------
 
 --------------------------------------------------
-TXLib предупреждает:
+TXLib пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
 
-Программа: D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe,
+пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ: D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe,
 
-ВНЕЗАПНО: Нарушение доступа к памяти.
+пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ: пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
 
-#1: Исключение EXCEPTION_ACCESS_VIOLATION (0xC0000005) при вяполнении кода по адресу 0x0041DAC0 в функции GetL() в файле D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp на строке 145. Попятка записатя данняе по адресу 0x00000010 в модуле D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe. Спасибо _txVectoredExceptionHandler(), что сообщил. Люблю его <3
+#1: пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ EXCEPTION_ACCESS_VIOLATION (0xC0000005) пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 0x0041DAC0 пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ GetTranslationUnit() пїЅ пїЅпїЅпїЅпїЅпїЅ D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 145. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 0x00000010 пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ _txVectoredExceptionHandler(), пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ <3
 
-#1: TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400], Instance: 0x004FB2FC (32-bit), Flags: Cmdre0, Thread: 0x441C (Main), GetLastError(): 183 (Невозможно создать файл, так как он уже существует). 
+#1: TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400], Instance: 0x004FB2FC (32-bit), Flags: Cmdre0, Thread: 0x441C (Main), GetLastError(): 183 (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ).
 
 --------------------------------------------------
-Стек вязовов:
+пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
 
-# 0 0x0041DAC0 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetL() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (145):
+# 0 0x0041DAC0 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetTranslationUnit() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (145):
 
     143:     else
     144:     {
-=>  145:         cur_op->left = GetE(vars, stk, iter);
-    146: 
+=>  145:         cur_op->left = GetAddExpression(vars, stk, iter);
+    146:
     147:         if (cur_op->left == nullptr)
 
-# 1 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetL() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
+# 1 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetTranslationUnit() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
 
      99:                 next_func->left  = cur_op;
-    100: 
-=>  101:                 next_func->right = GetL(vars, stk, iter);
-    102: 
+    100:
+=>  101:                 next_func->right = GetTranslationUnit(vars, stk, iter);
+    102:
     103:                 return next_func;
 
-# 2 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetL() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
+# 2 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetTranslationUnit() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
 
      99:                 next_func->left  = cur_op;
-    100: 
-=>  101:                 next_func->right = GetL(vars, stk, iter);
-    102: 
+    100:
+=>  101:                 next_func->right = GetTranslationUnit(vars, stk, iter);
+    102:
     103:                 return next_func;
 
-# 3 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetL() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
+# 3 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetTranslationUnit() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
 
      99:                 next_func->left  = cur_op;
-    100: 
-=>  101:                 next_func->right = GetL(vars, stk, iter);
-    102: 
+    100:
+=>  101:                 next_func->right = GetTranslationUnit(vars, stk, iter);
+    102:
     103:                 return next_func;
 
-# 4 0x0041D69C in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetG() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (41):
+# 4 0x0041D69C in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetSyntaxTree() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (41):
 
      39:     SplitOnLexems(&program, &lexems, vars);
      40:     size_t i = 0;
-=>   41:     TreeNode *node = GetL(vars, &lexems, &i);;
+=>   41:     TreeNode *node = GetTranslationUnit(vars, &lexems, &i);;
      42:     SetParents(node);
-     43: 
+     43:
 
 # 5 0x0041C49B in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: main() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/main.cpp (25):
 
      23:     }
-     24: 
-=>   25:     l_elems.syntax_tree.root = GetG(&l_elems.vars, argv[1]);
-     26: 
+     24:
+=>   25:     l_elems.syntax_tree.root = GetSyntaxTree(&l_elems.vars, argv[1]);
+     26:
      27:     GRAPH_DUMP_TREE(&l_elems.syntax_tree);
 
 --------------------------------------------------
@@ -241,69 +241,69 @@ Directory:	D:\postuplenie\treniruys\FilyakLanguage
 --------------------------------------------------
 
 --------------------------------------------------
-TXLib соболезнует...
+TXLib пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ...
 
-Программа: D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe,
+пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ: D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe,
 
-ВНЕЗАПНО: signal (11, 0x00): SIGSEGV: Доступ по неверному указателю. Ставяте ассертя! 
+пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ: signal (11, 0x00): SIGSEGV: пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ!
 
-Нарушение доступа к памяти.
+пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
 
-#1: Исключение EXCEPTION_ACCESS_VIOLATION (0xC0000005) при вяполнении кода по адресу 0x0041DAC0 в функции GetL() в файле D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp на строке 145. Попятка записатя данняе по адресу 0x00000010 в модуле D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe. Спасибо _txVectoredExceptionHandler(), что сообщил. Люблю его <3
+#1: пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ EXCEPTION_ACCESS_VIOLATION (0xC0000005) пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 0x0041DAC0 пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ GetTranslationUnit() пїЅ пїЅпїЅпїЅпїЅпїЅ D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 145. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 0x00000010 пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ _txVectoredExceptionHandler(), пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ <3
 
-С помощяю функции signal() вя можете сами обработатя эту ошибку.
+пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ signal() пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
 
-#2: TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400], Instance: 0x004FB2FC (32-bit), Flags: Cmdre0, Thread: 0x441C (Main), GetLastError(): 183 (Невозможно создать файл, так как он уже существует). 
+#2: TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400], Instance: 0x004FB2FC (32-bit), Flags: Cmdre0, Thread: 0x441C (Main), GetLastError(): 183 (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ).
 
 --------------------------------------------------
-Стек вязовов:
+пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
 
-# 0 0x0041DAC0 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetL() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (145):
+# 0 0x0041DAC0 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetTranslationUnit() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (145):
 
     143:     else
     144:     {
-=>  145:         cur_op->left = GetE(vars, stk, iter);
-    146: 
+=>  145:         cur_op->left = GetAddExpression(vars, stk, iter);
+    146:
     147:         if (cur_op->left == nullptr)
 
-# 1 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetL() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
+# 1 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetTranslationUnit() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
 
      99:                 next_func->left  = cur_op;
-    100: 
-=>  101:                 next_func->right = GetL(vars, stk, iter);
-    102: 
+    100:
+=>  101:                 next_func->right = GetTranslationUnit(vars, stk, iter);
+    102:
     103:                 return next_func;
 
-# 2 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetL() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
+# 2 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetTranslationUnit() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
 
      99:                 next_func->left  = cur_op;
-    100: 
-=>  101:                 next_func->right = GetL(vars, stk, iter);
-    102: 
+    100:
+=>  101:                 next_func->right = GetTranslationUnit(vars, stk, iter);
+    102:
     103:                 return next_func;
 
-# 3 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetL() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
+# 3 0x0041D84E in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetTranslationUnit() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (101):
 
      99:                 next_func->left  = cur_op;
-    100: 
-=>  101:                 next_func->right = GetL(vars, stk, iter);
-    102: 
+    100:
+=>  101:                 next_func->right = GetTranslationUnit(vars, stk, iter);
+    102:
     103:                 return next_func;
 
-# 4 0x0041D69C in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetG() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (41):
+# 4 0x0041D69C in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetSyntaxTree() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (41):
 
      39:     SplitOnLexems(&program, &lexems, vars);
      40:     size_t i = 0;
-=>   41:     TreeNode *node = GetL(vars, &lexems, &i);;
+=>   41:     TreeNode *node = GetTranslationUnit(vars, &lexems, &i);;
      42:     SetParents(node);
-     43: 
+     43:
 
 # 5 0x0041C49B in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: main() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/main.cpp (25):
 
      23:     }
-     24: 
-=>   25:     l_elems.syntax_tree.root = GetG(&l_elems.vars, argv[1]);
-     26: 
+     24:
+=>   25:     l_elems.syntax_tree.root = GetSyntaxTree(&l_elems.vars, argv[1]);
+     26:
      27:     GRAPH_DUMP_TREE(&l_elems.syntax_tree);
 
 --------------------------------------------------

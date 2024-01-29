@@ -56,7 +56,7 @@ static TreeErrs_t AsmMain(LanguageElems *l_elems,
     ASM_PRINT("%s:\n");
 
     func = func->right->right;
-//параметры
+//
     while (func != nullptr)
     {
         AssembleOp(func->left, &l_elems->vars, output_file);
@@ -81,6 +81,7 @@ static TreeErrs_t AsmFuncs(TreeNode      *cur_func,
 
     if (func != nullptr)
     {
+    printf("HUY %d\n", __LINE__);
         func = func->left;
 
         const char *func_name = l_elems->vars.var_array[func->data.variable_pos].id;
@@ -282,7 +283,7 @@ static TreeErrs_t AssembleOp(const TreeNode  *node,
             {
                 printf("AssembleOp() KAVO OP_CODE : %d\n", node->data.key_word_code);
 
-                /*whaaaa? РєРѕРіРѕ С‚С‹ Р±Р»СЏС‚СЊ РёС‰РµС€СЊ?
+                /*whaaaa? кого ты блять ищешь?
                  +------------------*/
                 return kFailedToFind;
 

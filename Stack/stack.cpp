@@ -41,6 +41,9 @@ static void HashStack(Stack *stk);
 
 static unsigned long long HashFunc(const void *data, size_t count);
 
+static size_t GetNameTablePos(size_t code);
+
+
 CANARY_ON(
           static CanaryType_t *GetLeftDataCanaryPtr(const Stack *stk)
           {
@@ -277,6 +280,21 @@ StackErr_t Pop(Stack *stk, StackElemType_t *ret_value)
     return stk->stack_data.status;
 }
 
+static size_t GetNameTablePos(size_t code)
+{
+    for (size_t i = 0; i < kKeyWordCount; i++)
+    {
+        if (NameTable[i].key_code == code)
+        {
+            return i;
+        }
+    }
+
+    printf("GetNameTablePos(): could not find suzh code\n");
+
+    return 0;
+}
+
 void StackDump(const Stack *stk, LogInfo info)
 {
     CHECK(stk);
@@ -342,7 +360,9 @@ void StackDump(const Stack *stk, LogInfo info)
                     {
                         case kOperator:
                         {
-                            fprintf(LogFile, "\t\t +---->op - \"%s\"\n\n", NameTable[stk->stack_data.data[i]->data.key_word_code - 1].key_word);
+                            size_t pos = GetNameTablePos(stk->stack_data.data[i]->data.key_word_code);
+
+                            fprintf(LogFile, "\t\t +---->op - \"%s\"\n\n", NameTable[pos].key_word);
 
                             break;
                         }
@@ -360,6 +380,10 @@ void StackDump(const Stack *stk, LogInfo info)
 
                             break;
                         }
+
+                        case kParamsNode:
+                        case kVarDecl:
+                        case kCall:
 
                         default:
                         {

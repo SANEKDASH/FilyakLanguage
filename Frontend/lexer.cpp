@@ -6,11 +6,11 @@
 #include "../Stack/stack.h"
 #include "../Common/NameTable.h"
 
-static TreeNode *GetOperation(Expr *expr);
-static TreeNode *GetNumber(Expr *expr);
-static TreeNode *GetOperation(Expr *expr);
-static TreeNode *GetId(Expr      *expr,
-                       Variables *vars);
+static TreeNode *GetOperation    (Expr *expr);
+static TreeNode *GetNumber       (Expr *expr);
+static TreeNode *GetOperation    (Expr *expr);
+static TreeNode *GetIdentificator(Expr      *expr,
+                                  Variables *vars);
 
 static int GetLexem(Stack     *stk,
                     Expr      *expr,
@@ -87,7 +87,7 @@ static int GetLexem(Stack     *stk,
 
         if (node == nullptr)
         {
-            node = GetId(expr, vars);
+            node = GetIdentificator(expr, vars);
         }
 
         if (Push(stk, node) != kStackClear)
@@ -147,15 +147,10 @@ static TreeNode *GetOperation(Expr *expr)
                     NameTable[i].key_word,
                     NameTable[i].word_len) == 0)
         {
-            node = OP_CTOR(i + 1);
+            node = OP_CTOR(NameTable[i].key_code);
 
             POS += NameTable[i].word_len;
 
-            if (i+1 == kRightBracket)
-            {
-                printf("mother was fucked\n");
-                printf("OP_CODE %d\n", i + 1);
-            }
         }
     }
 
@@ -168,7 +163,7 @@ static TreeNode *GetOperation(Expr *expr)
 
 static const int kMaxIdLen = 64;
 
-static TreeNode *GetId(Expr      *expr,
+static TreeNode *GetIdentificator(Expr      *expr,
                        Variables *vars)
 {
     SkipExprSpaces(expr);
@@ -216,9 +211,9 @@ static void SkipExprSpaces(Expr *expr)
 
 static bool RusIsalpha(char c)
 {
-    return (c >= 'ï¿½' && c <= 'ï¿½') ||
-           (c >= 'ï¿½' && c <= 'ï¿½') ||
-           (c == 'ï¿½' || c == 'ï¿½');
+    return (c >= 'à' && c <= 'ÿ') ||
+           (c >= 'À' && c <= 'ß') ||
+           (c == '¸' || c == '¨');
 }
 
 //==============================================================================
