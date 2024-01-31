@@ -120,24 +120,6 @@ TreeErrs_t GraphDumpTree(Tree *tree,
     return kTreeSuccess;
 }
 
-
-//================================================================================================
-
-static size_t GetNameTablePos(size_t code)
-{
-    for (size_t i = 0; i < kKeyWordCount; i++)
-    {
-        if (NameTable[i].key_code == code)
-        {
-            return i;
-        }
-    }
-
-    printf("GetNameTablePos(): could not find suzh code\n");
-
-    return 0;
-}
-
 //================================================================================================
 
 static void LogPrintTree(TreeNode *node,

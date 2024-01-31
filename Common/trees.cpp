@@ -169,7 +169,7 @@ TreeNode *NodeCtor(TreeNode         *parent_node,
     {
         case kOperator:
         {
-           node->data.key_word_code = (KeyCode_t) data;
+            node->data.key_word_code = (KeyCode_t) data;
 
             break;
         }
@@ -375,7 +375,7 @@ TreeErrs_t ReadLanguageElemsOutOfFile(LanguageElems *l_elems,
 
     Text tree_text = {0};
 
-    if (ReadTextFromFile(&tree_text, file_name, SplitBufIntoWords) != kSuccess)
+    if (ReadWordsFromFile(&tree_text, file_name) != kSuccess)
     {
         printf("\nReadTreeOutOfFile() failed to read text from file\n");
 
@@ -411,56 +411,56 @@ static TreeNode* CreateNodeFromText(Variables     *vars,
     TreeNode *node = nullptr;
 
 
-    if (*text->lines_ptr[*iterator] == '(')
+    if (*text->lines_ptr[*iterator].str == '(')
     {
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
 
         ++(*iterator);
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
 
-        ExpressionType_t type = (ExpressionType_t) atoi(text->lines_ptr[*iterator]);
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+        ExpressionType_t type = (ExpressionType_t) atoi(text->lines_ptr[*iterator].str);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
 
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
 
         switch (type)
         {
             case kConstNumber:
             {
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
         ++(*iterator);
 
                 node = NodeCtor(nullptr,
                                 nullptr,
                                 nullptr,
                                 kConstNumber,
-                                strtod(text->lines_ptr[*iterator], nullptr));
+                                strtod(text->lines_ptr[*iterator].str, nullptr));
                 break;
             }
 
             case kOperator:
             {
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
         ++(*iterator);
 
                 node = NodeCtor(nullptr,
                                 nullptr,
                                 nullptr,
                                 kOperator,
-                                atoi(text->lines_ptr[*iterator]));
+                                atoi(text->lines_ptr[*iterator].str));
                 break;
             }
 
             case kIdentificator:
             {
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
         ++(*iterator);
 
-                int pos = SeekVariable(vars, text->lines_ptr[*iterator]);
+                int pos = SeekVariable(vars, text->lines_ptr[*iterator].str);
 
                 if (pos < 0)
                 {
-                    pos = AddVar(vars, text->lines_ptr[*iterator]);
+                    pos = AddVar(vars, text->lines_ptr[*iterator].str);
                 }
 
                 node = NodeCtor(nullptr,
@@ -474,13 +474,13 @@ static TreeNode* CreateNodeFromText(Variables     *vars,
             case kFuncDef:
             {
         ++(*iterator);
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
 
-                int pos = SeekVariable(vars, text->lines_ptr[*iterator]);
+                int pos = SeekVariable(vars, text->lines_ptr[*iterator].str);
 
                 if (pos < 0)
                 {
-                    pos = AddVar(vars, text->lines_ptr[*iterator]);
+                    pos = AddVar(vars, text->lines_ptr[*iterator].str);
                 }
 
                 node = NodeCtor(nullptr,
@@ -494,7 +494,7 @@ static TreeNode* CreateNodeFromText(Variables     *vars,
 
             case kParamsNode:
             {
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
 
                 node = NodeCtor(nullptr,
                                 nullptr,
@@ -506,14 +506,14 @@ static TreeNode* CreateNodeFromText(Variables     *vars,
 
             case kVarDecl:
             {
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
         ++(*iterator);
 
-                int pos = SeekVariable(vars, text->lines_ptr[*iterator]);
+                int pos = SeekVariable(vars, text->lines_ptr[*iterator].str);
 
                 if (pos < 0)
                 {
-                    pos = AddVar(vars, text->lines_ptr[*iterator]);
+                    pos = AddVar(vars, text->lines_ptr[*iterator].str);
                 }
 
                 node = NodeCtor(nullptr,
@@ -527,7 +527,7 @@ static TreeNode* CreateNodeFromText(Variables     *vars,
 
             case kCall:
             {
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
 
                 node = NodeCtor(nullptr,
                                 nullptr,
@@ -539,7 +539,7 @@ static TreeNode* CreateNodeFromText(Variables     *vars,
             }
             default:
             {
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
 
                 printf("CreateNodeFromText() -> KAVO? 1000-7 ???");
 
@@ -547,18 +547,18 @@ static TreeNode* CreateNodeFromText(Variables     *vars,
             }
         }
     }
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
 
     ++(*iterator);
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
 
     node->left =  CreateNodeFromBrackets(vars, text, iterator);
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
 
     node->right = CreateNodeFromBrackets(vars, text, iterator);
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator]);
+        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
 
-    if (*text->lines_ptr[*iterator] != ')')
+    if (*text->lines_ptr[*iterator].str != ')')
     {
         TreeDtor(node);
 
@@ -576,7 +576,7 @@ static TreeNode *CreateNodeFromBrackets(Variables     *vars,
 {
     TreeNode *node = nullptr;
 
-    if (*text->lines_ptr[*iterator] == '(')
+    if (*text->lines_ptr[*iterator].str == '(')
     {
         node = CreateNodeFromText(vars, text, iterator);
 
@@ -587,9 +587,9 @@ static TreeNode *CreateNodeFromBrackets(Variables     *vars,
             return nullptr;
         }
     }
-    else if (*text->lines_ptr[*iterator] != ')')
+    else if (*text->lines_ptr[*iterator].str != ')')
     {
-        if (strcmp(text->lines_ptr[*iterator], "_") == 0)
+        if (strcmp(text->lines_ptr[*iterator].str, "_") == 0)
         {
             ++(*iterator);
 

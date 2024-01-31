@@ -139,6 +139,8 @@ CanaryType_t *GetRightDataCanaryPtr(const Stack *stk);
 
 CanaryType_t *GetLeftDataCanaryPtr(const Stack *stk);
 
+size_t GetNameTablePos(size_t code);
+
 int GetBit(int num, size_t pos);
 
 int InitLog();

@@ -2,6 +2,12 @@
 
 static const int kSysCmdLen = 64;
 
+static size_t GetLinesCount(const char *buf);
+
+static size_t SetLineNumbers(const char *buf,
+                             size_t      lines_count,
+                             size_t     *line_numbers);
+
 //==============================================================================
 
 void SkipSpaces(char **line)
@@ -39,17 +45,65 @@ size_t GetFileSize(FILE *ptr_file)
 //==============================================================================
 
 TextErrs_t ReadTextFromFile(Text       *text,
-                            const char *file_name,
-                            size_t      ParseFunc(char *))
+                            const char *file_name)
 {
-    /*char sys_cmd[kSysCmdLen] = {0};
-    char new_file_name[kSysCmdLen] = {0};
+    FILE *input_file = fopen(file_name, "rb");
 
-    sprintf(new_file_name, "converted_%s", file_name);
-    sprintf(sys_cmd, "iconv -f CP1251 -t UTF-8 %s > %s", file_name, new_file_name);
+    if (input_file == nullptr)
+    {
+        perror("\nReadTextFromFile() failed to open input file\n");
 
-    system(sys_cmd);*/
+        return kOpenError;
+    }
+    text->buf_size = GetFileSize(input_file) + 1;
+    text->buf      = (char *) calloc(text->buf_size, sizeof(char));
 
+    if (!text->buf)
+    {
+        perror("\n>>ReadTextFromFile() failed to allocate memory for buf");
+
+        return kAllocError;
+    }
+
+    size_t check_read = fread(text->buf, sizeof(char), text->buf_size - 1, input_file);
+
+    if (check_read != (text->buf_size - 1))
+    {
+        perror("\n>>ReadTextFromFile() failed to read from file");
+
+        return kReadingError;
+    }
+
+    text->lines_count = GetLinesCount(text->buf);
+
+    size_t *line_numbers = (size_t *) calloc(text->lines_count, sizeof(size_t));
+
+    SetLineNumbers(text->buf, text->lines_count, line_numbers);
+
+    SplitBufIntoLines(text->buf);
+
+    FillText(text);
+
+    for (size_t i = 0; i < text->lines_count; i++)
+    {
+        text->lines_ptr[i].real_line_number = line_numbers[i];
+    }
+
+    if (fclose(input_file))
+    {
+        perror("\n>>ReadTextFromFile() failed to close input file");
+
+        return kCloseError;
+    }
+
+    return kSuccess;
+}
+
+//==============================================================================
+
+TextErrs_t ReadWordsFromFile(Text       *text,
+                             const char *file_name)
+{
     FILE *input_file = fopen(file_name, "rb");
 
     if (input_file == nullptr)
@@ -78,7 +132,7 @@ TextErrs_t ReadTextFromFile(Text       *text,
         return kReadingError;
     }
 
-    text->lines_count = ParseFunc(text->buf);
+    text->lines_count = SplitBufIntoWords(text->buf);
 
     FillText(text);
 
@@ -90,6 +144,71 @@ TextErrs_t ReadTextFromFile(Text       *text,
     }
 
     return kSuccess;
+}
+
+//==============================================================================
+
+static size_t GetLinesCount(const char *buf)
+{
+    size_t lines_count = 0;
+
+    for (size_t i = 0; buf[i] != '\0';)
+    {
+        if (buf[i] == '\n')
+        {
+            ++lines_count;
+
+            while (buf[i] == '\n' || buf[i] == '\r')
+            {
+                ++i;
+            }
+        }
+        else
+        {
+            ++i;
+        }
+    }
+
+    return lines_count;
+}
+
+//==============================================================================
+
+static size_t SetLineNumbers(const char *buf,
+                             size_t      lines_count,
+                             size_t     *line_numbers)
+{
+    size_t line_number = 1;
+    size_t cur_line    = 0;
+
+    *(line_numbers + cur_line++) = line_number;
+
+    for (size_t i = 0; buf[i] != '\0';)
+    {
+        if (buf[i] == '\n')
+        {
+            while (buf[i] == '\n' || buf[i] == '\r')
+            {
+                if (buf[i] == '\n')
+                {
+                    ++line_number;
+                }
+
+                ++i;
+            }
+
+            if (cur_line < lines_count)
+            {
+                *(line_numbers + cur_line++) = line_number;
+            }
+        }
+        else
+        {
+            ++i;
+        }
+    }
+
+    return line_number;
 }
 
 //==============================================================================
@@ -175,7 +294,7 @@ size_t SplitBufIntoLines(char *buf)
 
 void FillText(Text *text)
 {
-    text->lines_ptr = (char **) calloc(text->lines_count, sizeof(char *));
+    text->lines_ptr = (Line *) calloc(text->lines_count, sizeof(Line));
 
     char *cur_word = text->buf;
 
@@ -192,7 +311,7 @@ void FillText(Text *text)
                 ++i;
             }
 
-            *(text->lines_ptr + words_pos++) = cur_word;
+            text->lines_ptr[words_pos++].str = cur_word;
 
             cur_word = text->buf + i;
         }

@@ -20,12 +20,18 @@ typedef enum
     kEOF            = 8,
 } TextErrs_t;
 
+struct Line
+{
+    char   *str;
+    size_t  real_line_number;
+};
+
 struct Text
 {
-    char **lines_ptr;
-    size_t lines_count;
-    char *buf;
-    size_t buf_size;
+    Line    *lines_ptr;
+    size_t   lines_count;
+    char    *buf;
+    size_t   buf_size;
 };
 
 void SkipSpaces(char **line);
@@ -33,8 +39,10 @@ void SkipSpaces(char **line);
 size_t GetFileSize(FILE *ptr_file);
 
 TextErrs_t ReadTextFromFile(Text       *text,
-                            const char *file_name,
-                            size_t      ParseFunc(char *));
+                            const char *file_name);
+
+TextErrs_t ReadWordsFromFile(Text       *text,
+                             const char *file_name);
 
 size_t SplitBufIntoWords(char *buf);
 

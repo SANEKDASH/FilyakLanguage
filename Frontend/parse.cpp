@@ -22,7 +22,7 @@ static void SkipSpaces(Expr *expr);
 static TreeNode *GetDeclaration      (Variables *vars, Stack *stk, size_t *iter);
 static TreeNode *GetConditionalOp    (Variables *vars, Stack *stk, size_t *iter);
 static TreeNode *GetParams           (Variables *vars, Stack *stk, size_t *iter);
-static TreeNode *GetConditionalTree  (Variables *vars, Stack *stk, size_t *iter);
+static TreeNode *GetDeclarationList  (Variables *vars, Stack *stk, size_t *iter);
 static TreeNode *GetIdTree           (Variables *vars, Stack *stk, size_t *iter);
 static TreeNode *GetExternalDecl     (Variables *vars, Stack *stk, size_t *iter);
 static TreeNode *GetInstructionList  (Variables *vars, Stack *stk, size_t *iter);
@@ -31,14 +31,14 @@ static TreeNode *GetAssignment       (Variables *vars, Stack *stk, size_t *iter)
 static TreeNode *GetCondition        (Variables *vars, Stack *stk, size_t *iter);
 static TreeNode *GetChoiceInstruction(Variables *vars, Stack *stk, size_t *iter);
 static TreeNode *GetCycleInstruction (Variables *vars, Stack *stk, size_t *iter);
-static TreeNode *GetFuncCall         (Variables *vars, Stack *stk, size_t *iter);
 static TreeNode *GetParams           (Variables *vars, Stack *stk, size_t *iter);
+static TreeNode *GetFuncCall         (Variables *vars, Stack *stk, size_t *iter);
 
-static TreeNode *GetFuncCall(TreeNode  *identificator_node,
-                             Variables *vars,
-                             Stack     *stk,
-                             size_t    *iter);
-
+static TreeNode *GetFuncDeclaration(TreeNode  *identificator,
+                                    TreeNode  *type,
+                                    Variables *vars,
+                                    Stack     *stk,
+                                    size_t    *iter);
 
 TreeNode *GetSyntaxTree(Variables  *vars,
                         const char *file_name)
@@ -48,7 +48,7 @@ TreeNode *GetSyntaxTree(Variables  *vars,
     LOG_PRINT("im GetSyntaxTree leading all work\n\n");
 
     Text              program;
-    ReadTextFromFile(&program, file_name, SplitBufIntoLines);
+    ReadTextFromFile(&program, file_name);
 
     fclose(output_file);
 
@@ -74,11 +74,12 @@ TreeNode *GetSyntaxTree(Variables  *vars,
     #define OP_CTOR(op_code) NodeCtor(nullptr, nullptr, nullptr, kOperator, op_code)
 
     #define CALL_CTOR(identificator_node, params_node) \
-            NodeCtor(nullptr, identificator_node, params_node, kCall, 0)
+        NodeCtor(nullptr, identificator_node, params_node, kCall, 0)
 
     #define CUR_NODE       stk->stack_data.data[*iter]
     #define CUR_NODE_TYPE  stk->stack_data.data[*iter]->type
     #define CUR_NODE_DATA  stk->stack_data.data[*iter]->data.key_word_code
+    #define CUR_LINE       stk->stack_data.data[*iter]->line_number
 
     #define CUR_ID_STATE   vars->var_array[stk->stack_data.data[*iter]->data.variable_pos].declaration_state
     #define CUR_ID_TYPE    vars->var_array[stk->stack_data.data[*iter]->data.variable_pos].id_type
@@ -88,7 +89,20 @@ TreeNode *GetSyntaxTree(Variables  *vars,
     #define NEXT_NODE_TYPE stk->stack_data.data[*iter + 1]->type
     #define NEXT_NODE_DATA stk->stack_data.data[*iter + 1]->data.key_word_code
 
-    #define DPR printf("POS %d, LINE %d, FUNC %s\n", *iter, __LINE__, __func__);
+    #ifdef DEBUG
+        #define DPR printf("POS %d, LINE %d, FUNC %s\n", *iter, __LINE__, __func__);
+    #else
+        #define DPR
+    #endif
+
+    #define SYNTAX_OP_ASSERT(key_code)                                                                                  \
+        if (CUR_NODE_TYPE == kOperator && CUR_NODE_DATA != key_code)                                                    \
+        {                                                                                                               \
+            printf(">>LINE %d:\n"                                                                                       \
+                   "  Ѕл€€€€.... “ут должно быть '%s'\n", CUR_LINE, NameTable[GetNameTablePos(key_code)].key_word);     \
+                                                                                                                        \
+            return nullptr;                                                                                             \
+        }
 
 //==============================================================================
 
@@ -101,7 +115,6 @@ static TreeNode *GetExternalDecl(Variables *vars,
     cur_unit->left = GetDeclaration(vars, stk, iter);
 
 DPR
-    printf("size: %d\n", stk->stack_data.size);
     if (*iter < stk->stack_data.size - 1)
     {
         cur_unit->right = OP_CTOR(kEndOfLine);
@@ -116,86 +129,47 @@ DPR
 
 static TreeNode *GetDeclaration(Variables *vars, Stack *stk, size_t *iter)
 {
-    TreeNode *decl = nullptr;
+    if (!IsType(CUR_NODE_DATA))
+    {
+        return nullptr;
+    }
+
     TreeNode *type = CUR_NODE;
 
     GO_TO_NEXT_TOKEN;
 
-    if (CUR_NODE_TYPE == kIdentificator)
+    if (CUR_NODE_TYPE != kIdentificator)
     {
-        TreeNode *identificator = CUR_NODE;
+        //mistake
 
-        GO_TO_NEXT_TOKEN;
-
-        if (CUR_NODE_TYPE == kOperator &&
-            CUR_NODE_DATA == kLeftBracket)
-        {
-            decl = NodeCtor(nullptr, type, nullptr, kFuncDef, identificator->data.variable_pos);
-            GO_TO_NEXT_TOKEN;
-
-            TreeNode *params = NodeCtor(nullptr, nullptr, nullptr, kParamsNode, 0);
-
-            params->left = GetParams(vars, stk, iter);
-
-            GO_TO_NEXT_TOKEN;
-
-            params->right = GetInstructionList(vars, stk, iter);
-DPR
-
-            decl->right = params;
-
-            vars->var_array[identificator->data.variable_pos].declaration_state = true;
-            vars->var_array[identificator->data.variable_pos].id_type           = kFunc;
-DPR
-
-            return decl;
-        }
-        else
-        {
-            decl = NodeCtor(nullptr,
-                            type,
-                            nullptr,
-                            kVarDecl,
-                            identificator->data.variable_pos);
-
-            TreeNode *assign = nullptr;
-
-            if (CUR_NODE_TYPE == kOperator &&
-                CUR_NODE_DATA == kAssign)
-            {
-                assign = CUR_NODE;
-
-                GO_TO_NEXT_TOKEN;
-
-                assign->left  = GetAddExpression(vars, stk, iter);
-                assign->right = identificator;
-
-                if (CUR_NODE_TYPE == kOperator && CUR_NODE_DATA == kEndOfLine)
-                {
-                    GO_TO_NEXT_TOKEN;
-                }
-                else
-                {
-                    printf(">>exprected ';' pos : %d\n", *iter);
-
-                    return nullptr;
-                }
-            }
-            else
-            {
-                assign = NodeCtor(nullptr,
-                         nullptr,
-                         nullptr,
-                         kIdentificator,
-                         identificator->data.variable_pos);
-            }
-
-            decl->right = assign;
-
-            vars->var_array[identificator->data.variable_pos].declaration_state = true;
-            vars->var_array[identificator->data.variable_pos].id_type           = kVar;
-        }
+        return nullptr;
     }
+
+    TreeNode *identificator = CUR_NODE;
+
+    GO_TO_NEXT_TOKEN;
+
+    if (CUR_NODE_TYPE == kOperator && CUR_NODE_DATA == kLeftBracket)
+    {
+        return GetFuncDeclaration(identificator, type, vars, stk, iter);
+    }
+
+    TreeNode *decl = NodeCtor(nullptr,
+                              type,
+                              nullptr,
+                              kVarDecl,
+                              identificator->data.variable_pos);
+
+    if (CUR_NODE_TYPE == kOperator && CUR_NODE_DATA == kAssign)
+    {
+        (*iter)--;
+
+        decl->right = GetAssignment(vars, stk, iter);
+    }
+
+    vars->var_array[identificator->data.variable_pos].declaration_state = true;
+    vars->var_array[identificator->data.variable_pos].id_type           = kVar;
+
 
     DPR
 
@@ -204,16 +178,68 @@ DPR
 
 //==============================================================================
 
-/*static TreeNode *GetConditionalTree(Variables *vars, Stack *stk, size_t *iter)
+static TreeNode *GetFuncDeclaration(TreeNode  *identificator,
+                                    TreeNode  *type,
+                                    Variables *vars,
+                                    Stack     *stk,
+                                    size_t    *iter)
 {
-    TreeNode *cond_node = OP_CTOR(kEndOfLine);
 
-    cond_node->left  = GetConditionalOp(vars, stk, iter);
+    TreeNode *decl = NodeCtor(nullptr, type, nullptr, kFuncDef, identificator->data.variable_pos);
+DPR
+    TreeNode *params = NodeCtor(nullptr, nullptr, nullptr, kParamsNode, 0);
+DPR
+    params->left = GetDeclarationList(vars, stk, iter);
+DPR
+    params->right = GetInstructionList(vars, stk, iter);
+DPR
+    decl->right = params;
 
-    cond_node->right = GetTranslationUnit(vars, stk, iter);
+    vars->var_array[identificator->data.variable_pos].declaration_state = true;
+    vars->var_array[identificator->data.variable_pos].id_type           = kFunc;
+DPR
 
-    return cond_node;
-}*/
+    return decl;
+}
+
+//==============================================================================
+
+static TreeNode *GetDeclarationList(Variables *vars, Stack *stk, size_t *iter)
+{
+    SYNTAX_OP_ASSERT(kLeftBracket);
+
+    TreeNode *decl_list = OP_CTOR(kEnumOp);
+DPR
+    GO_TO_NEXT_TOKEN;
+DPR
+    if (CUR_NODE_TYPE == kOperator && CUR_NODE_DATA == kRightBracket)
+    {
+        GO_TO_NEXT_TOKEN;
+
+        return decl_list;
+    }
+
+    TreeNode *decl = decl_list;
+
+    decl->left = GetDeclaration(vars, stk, iter);
+DPR
+    while (CUR_NODE_TYPE == kOperator && CUR_NODE_DATA == kEnumOp)
+    {
+        decl->right = CUR_NODE;
+
+        decl = decl->right;
+
+        GO_TO_NEXT_TOKEN;
+
+        decl->left = GetDeclaration(vars, stk, iter);
+    }
+
+    SYNTAX_OP_ASSERT(kRightBracket);
+
+    GO_TO_NEXT_TOKEN;
+
+    return decl_list;
+}
 
 //==============================================================================
 
@@ -223,8 +249,7 @@ static TreeNode *GetIdTree(Variables *vars, Stack *stk, size_t *iter)
 
     if (CUR_ID_TYPE == kVar)
     {
-        if (NEXT_NODE_TYPE == kOperator &&
-            NEXT_NODE_DATA == kAssign)
+        if (NEXT_NODE_TYPE == kOperator && NEXT_NODE_DATA == kAssign)
         {
             id_tree        = NEXT_NODE;
             id_tree->right = CUR_NODE;
@@ -248,16 +273,6 @@ static TreeNode *GetIdTree(Variables *vars, Stack *stk, size_t *iter)
 
 //==============================================================================
 
-static TreeNode *GetNextOperator(TreeNode  *cur_op,
-                                 Variables *vars,
-                                 Stack     *stk,
-                                 size_t    *iter)
-{
-
-}
-
-//==============================================================================
-
 TreeNode *GetExpression(Variables *vars, Stack *stk, size_t *iter)
 {
     TreeNode *node = nullptr;
@@ -270,10 +285,7 @@ TreeNode *GetExpression(Variables *vars, Stack *stk, size_t *iter)
 
             node = GetAddExpression(vars, stk, iter);
 
-            if (CUR_NODE_TYPE != kOperator && CUR_NODE_DATA != kRightBracket)
-            {
-                return nullptr;
-            }
+            SYNTAX_OP_ASSERT(kRightBracket);
 
             GO_TO_NEXT_TOKEN;
 
@@ -333,6 +345,7 @@ TreeNode *GetPrimaryExpression(Variables *vars, Stack *stk, size_t *iter)
             GO_TO_NEXT_TOKEN;
 
             un_func->left  = nullptr;
+
             un_func->right = GetExpression(vars, stk, iter);
 
             return un_func;
@@ -426,7 +439,9 @@ DPR
 
         if (CUR_NODE_TYPE == kOperator && CUR_NODE_DATA == kLeftBracket)
         {
-           return GetFuncCall(identificator_node, vars, stk, iter);
+            --(*iter);
+
+            return GetFuncCall(vars, stk, iter);
         }
 
         return identificator_node;
@@ -448,11 +463,14 @@ DPR
 
 //==============================================================================
 
-static TreeNode *GetFuncCall(TreeNode  *identificator_node,
-                             Variables *vars,
+static TreeNode *GetFuncCall(Variables *vars,
                              Stack     *stk,
                              size_t    *iter)
 {
+    TreeNode *identificator_node = CUR_NODE;
+
+    GO_TO_NEXT_TOKEN;
+
     return CALL_CTOR(identificator_node, GetParams(vars, stk, iter));
 }
 
@@ -460,35 +478,39 @@ static TreeNode *GetFuncCall(TreeNode  *identificator_node,
 
 static TreeNode *GetParams(Variables *vars, Stack *stk, size_t *iter)
 {
-
-    if (CUR_NODE_TYPE == kOperator && CUR_NODE_DATA != kLeftBracket)
-    {
-        //mistake
-        return nullptr;
-    }
-
-    GO_TO_NEXT_TOKEN;
+    SYNTAX_OP_ASSERT(kLeftBracket);
 
     TreeNode *params_node = OP_CTOR(kEnumOp);
 
-    TreeNode *param       = params_node;
+    GO_TO_NEXT_TOKEN;
+
+    if (CUR_NODE_TYPE == kOperator && CUR_NODE_DATA == kRightBracket)
+    {
+        GO_TO_NEXT_TOKEN;
+
+        return params_node;
+    }
+
+    TreeNode *param = params_node;
+
+    param->left = GetAddExpression(vars, stk, iter);
+DPR
 
     while (CUR_NODE_TYPE == kOperator && CUR_NODE_DATA == kEnumOp)
     {
-        param->left = GetAddExpression(vars, stk, iter);
 
         param->right = CUR_NODE;
-
+DPR
         param = param->right;
 
         GO_TO_NEXT_TOKEN;
-    }
+DPR
+        param->left  = GetAddExpression(vars, stk, iter);
 
-    if (CUR_NODE_TYPE == kOperator && CUR_NODE_DATA != kRightBracket)
-    {
-        //mistake
-        return nullptr;
+
     }
+DPR
+    SYNTAX_OP_ASSERT(kRightBracket);
 
     GO_TO_NEXT_TOKEN;
 
@@ -499,15 +521,13 @@ static TreeNode *GetParams(Variables *vars, Stack *stk, size_t *iter)
 
 static TreeNode *GetInstructionList(Variables *vars, Stack *stk, size_t *iter)
 {
-    if (CUR_NODE_TYPE != kOperator && CUR_NODE_DATA != kLeftZoneBracket)
-    {
-        //mistake
-        return nullptr;
-    }
+    SYNTAX_OP_ASSERT(kLeftZoneBracket);
+DPR
 
     GO_TO_NEXT_TOKEN;
 
     TreeNode *cur_instruction = OP_CTOR(kEndOfLine);
+DPR
 
     cur_instruction->left = GetInstruction(vars, stk, iter);
 
@@ -533,9 +553,30 @@ DPR
 
 static TreeNode *GetInstruction(Variables *vars, Stack *stk, size_t *iter)
 {
-    if (CUR_NODE_TYPE == kIdentificator && CUR_ID_TYPE == kVar)
+        DPR
+    if (CUR_NODE_TYPE == kIdentificator)
     {
-        return GetAssignment(vars, stk, iter);
+DPR     if (NEXT_NODE_TYPE == kOperator && NEXT_NODE_DATA == kAssign)
+        {
+            return GetAssignment(vars, stk, iter);
+        }
+        else if (NEXT_NODE_TYPE == kOperator && NEXT_NODE_DATA == kLeftBracket)
+        {
+DPR
+            TreeNode *call_tree = GetFuncCall(vars, stk, iter);
+
+            GO_TO_NEXT_TOKEN;
+
+            return call_tree;
+        }
+    }
+    else if (CUR_NODE_TYPE == kOperator && IsFunc(CUR_NODE_DATA))
+    {
+        TreeNode *standart_func = GetIdentificator(vars, stk, iter);
+
+        GO_TO_NEXT_TOKEN;
+
+        return standart_func;
     }
     else if (CUR_NODE_TYPE == kOperator && IsType(CUR_NODE_DATA))
     {
@@ -549,6 +590,7 @@ static TreeNode *GetInstruction(Variables *vars, Stack *stk, size_t *iter)
     {
         return GetCycleInstruction(vars, stk, iter);
     }
+DPR
 
     return nullptr;
 }
@@ -568,12 +610,7 @@ static TreeNode *GetAssignment(Variables *vars, Stack *stk, size_t *iter)
     assign_node->right = identificator;
     assign_node->left  = GetAddExpression(vars, stk, iter);
 
-    if (CUR_NODE_DATA != kEndOfLine)
-    {
-        printf(">>Expected ';' pos : %d\n", *iter);
-
-        return nullptr;
-    }
+    SYNTAX_OP_ASSERT(kEndOfLine);
 DPR
 
     GO_TO_NEXT_TOKEN;
@@ -600,23 +637,13 @@ static TreeNode *GetChoiceInstruction(Variables *vars, Stack *stk, size_t *iter)
 
 static TreeNode *GetCondition(Variables *vars, Stack *stk, size_t *iter)
 {
-    if (CUR_NODE_TYPE != kOperator && CUR_NODE_DATA != kLeftBracket)
-    {
-        //mistake message
-
-        return nullptr;
-    }
+    SYNTAX_OP_ASSERT(kLeftBracket);
 
     GO_TO_NEXT_TOKEN;
 
     TreeNode *condition_node = GetAddExpression(vars, stk, iter);
 
-    if (CUR_NODE_TYPE != kOperator && CUR_NODE_DATA != kRightBracket)
-    {
-        //mistake message
-
-        return nullptr;
-    }
+    SYNTAX_OP_ASSERT(kRightBracket);
 
     GO_TO_NEXT_TOKEN;
 
@@ -688,7 +715,8 @@ static bool IsFunc(KeyCode_t keyword_code)
            keyword_code == kDiff  ||
            keyword_code == kSqrt  ||
            keyword_code == kPrint ||
-           keyword_code == kScan;
+           keyword_code == kScan  ||
+           keyword_code == kReturn;
 }
 
 //==============================================================================

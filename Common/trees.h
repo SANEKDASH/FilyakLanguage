@@ -9,7 +9,8 @@ typedef double VarType_t;
 struct Expr
 {
     const char *string = nullptr;
-    size_t pos = 0;
+    size_t pos;
+    size_t line_number;
 };
 
 typedef enum
@@ -61,6 +62,8 @@ union NodeData
 
 struct TreeNode
 {
+    size_t line_number;
+
     NodeData data;
 
     ExpressionType_t type;

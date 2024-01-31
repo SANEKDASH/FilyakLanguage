@@ -22,6 +22,9 @@ static bool RusIsalpha(char c);
 
 static bool IsOperator(char c);
 
+//==============================================================================
+
+
 LexerErrs_t SplitOnLexems(Text      *text,
                           Stack     *stk,
                           Variables *vars)
@@ -32,26 +35,22 @@ LexerErrs_t SplitOnLexems(Text      *text,
 
     for (size_t i = 0; i < text->lines_count; i++)
     {
-
         Expr expr;
-        expr.string = text->lines_ptr[i];
-        expr.pos    = 0;
 
-    #define OP_CTOR(op_code)         NodeCtor(nullptr, nullptr       ,nullptr, kOperator,      op_code)
-    #define NUM_CTOR(val)            NodeCtor(nullptr, nullptr       ,nullptr, kConstNumber,   val)
-    #define ID_CTOR(pos)             NodeCtor(nullptr, nullptr       ,nullptr, kIdentificator, pos)
+        expr.pos         = 0;
+        expr.string      = text->lines_ptr[i].str;
+        expr.line_number = text->lines_ptr[i].real_line_number;
 
         while (expr.string[expr.pos] != '\0')
         {
             if (GetLexem(stk, &expr, vars) < 0)
             {
                 printf("Syntax error. POS: %d, LINE: %d\n", expr.pos + 1, i + 1);
+
                 return kSyntaxError;
             }
         }
-
     }
-
 
     CloseLog();
 
@@ -59,6 +58,10 @@ LexerErrs_t SplitOnLexems(Text      *text,
 }
 
 //==============================================================================
+
+#define OP_CTOR(op_code) NodeCtor(nullptr, nullptr       ,nullptr, kOperator,      op_code)
+#define NUM_CTOR(val)    NodeCtor(nullptr, nullptr       ,nullptr, kConstNumber,   val)
+#define ID_CTOR(pos)     NodeCtor(nullptr, nullptr       ,nullptr, kIdentificator, pos)
 
 #define CUR_CHAR expr->string[expr->pos]
 #define STRING   expr->string
@@ -97,7 +100,8 @@ static int GetLexem(Stack     *stk,
     }
     else
     {
-        printf("uncknown symbol : [%c]\n", CUR_CHAR);
+        printf(">>LINE %d:\n"
+               "  Что ты блять пишешь? '%s'\n", STRING);
         return -1;
     }
 
@@ -114,23 +118,27 @@ static TreeNode *GetNumber(Expr *expr)
     size_t  old_pos = POS;
     char   *num_end = nullptr;
 
-    val = strtod(STRING+ POS, &num_end);
+    val = strtod(STRING + POS, &num_end);
 
     POS = num_end - STRING;
 
     if (POS <= old_pos)
     {
-        printf("GetNumber() syntax error pos %d, string %s\n", POS, STRING + POS);
+        printf(">>LINE %d:\n"
+               "  Ты писать числа разучился? '%s'\n", expr->line_number, STRING);
     }
 
     SkipExprSpaces(expr);
 
-    return NodeCtor(nullptr,
-                    nullptr,
-                    nullptr,
-                    kConstNumber,
-                    val);
+    TreeNode *number =  NodeCtor(nullptr,
+                                 nullptr,
+                                 nullptr,
+                                 kConstNumber,
+                                 val);
 
+    number->line_number = expr->line_number;
+
+    return number;
 }
 
 //==============================================================================
@@ -149,8 +157,9 @@ static TreeNode *GetOperation(Expr *expr)
         {
             node = OP_CTOR(NameTable[i].key_code);
 
-            POS += NameTable[i].word_len;
+            node->line_number = expr->line_number;
 
+            POS += NameTable[i].word_len;
         }
     }
 
@@ -164,7 +173,7 @@ static TreeNode *GetOperation(Expr *expr)
 static const int kMaxIdLen = 64;
 
 static TreeNode *GetIdentificator(Expr      *expr,
-                       Variables *vars)
+                                  Variables *vars)
 {
     SkipExprSpaces(expr);
 
@@ -194,7 +203,11 @@ static TreeNode *GetIdentificator(Expr      *expr,
 
     SkipExprSpaces(expr);
 
-    return ID_CTOR(id_pos);
+    TreeNode *id_node =  ID_CTOR(id_pos);
+
+    id_node->line_number = expr->line_number;
+
+    return id_node;
 }
 
 //==============================================================================

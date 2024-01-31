@@ -322,3 +322,699 @@ Run file:	D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe
 Directory:	D:\postuplenie\treniruys\FilyakLanguage
 
 --------------------------------------------------
+
+--------------------------------------------------
+TXLib предупреждает:
+
+Программа: D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe,
+
+ВНЕЗАПНО: Нарушение доступа к памяти.
+
+#1: Исключение EXCEPTION_ACCESS_VIOLATION (0xC0000005) при вяполнении кода по адресу 0x0041E93C в функции GetParams() в файле D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp на строке 508. Попятка записатя данняе по адресу 0x00000014 в модуле D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe. Спасибо _txVectoredExceptionHandler(), что сообщил. Люблю его <3
+
+#1: TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400], Instance: 0x004FC2FC (32-bit), Flags: CmdrE0, Thread: 0x242C (Main), GetLastError(): 183 (Невозможно создать файл, так как он уже существует). 
+
+--------------------------------------------------
+Стек вязовов:
+
+# 0 0x0041E93C in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetParams() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (508):
+
+    506:     {
+    507: 
+=>  508:         param->right = CUR_NODE;
+    509: DPR
+    510: 
+
+# 1 0x0041E7AC in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetFuncCall() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (478):
+
+    476:     GO_TO_NEXT_TOKEN;
+    477: 
+=>  478:     return CALL_CTOR(identificator_node, GetParams(vars, stk, iter));
+    479: }
+    480: 
+
+# 2 0x0041EDFC in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetInstruction() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (572):
+
+    570:         {
+    571: DPR
+=>  572:             TreeNode *call_tree = GetFuncCall(vars, stk, iter);
+    573: 
+    574:             GO_TO_NEXT_TOKEN;
+
+# 3 0x0041EBB7 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetInstructionList() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (538):
+
+    536: DPR
+    537: 
+=>  538:     cur_instruction->left = GetInstruction(vars, stk, iter);
+    539: 
+    540:     TreeNode *instructions = cur_instruction;
+
+# 4 0x0041F0FC in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetChoiceInstruction() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (629):
+
+    627: 
+    628:     choice_node->left  = GetCondition      (vars, stk, iter);
+=>  629:     choice_node->right = GetInstructionList(vars, stk, iter);
+    630: 
+    631:     return choice_node;
+
+# 5 0x0041EEC9 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetInstruction() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (585):
+
+    583:     else if (CUR_NODE_TYPE == kOperator && CUR_NODE_DATA == kIf)//not ony if
+    584:     {
+=>  585:         return GetChoiceInstruction(vars, stk, iter);
+    586:     }
+    587:     else if (CUR_NODE_TYPE == kOperator && IsCycleKeyWord(CUR_NODE_DATA))
+
+# 6 0x0041EC43 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetInstructionList() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (549):
+
+    547: DPR
+    548: 
+=>  549:         cur_instruction->left = GetInstruction(vars, stk, iter);
+    550: DPR
+    551:     }
+
+# 7 0x0041DB21 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetFuncDeclaration() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (192):
+
+    190:     params->left = GetDeclarationList(vars, stk, iter);
+    191: DPR
+=>  192:     params->right = GetInstructionList(vars, stk, iter);
+    193: DPR
+    194:     decl->right = params;
+
+# 8 0x0041D90A in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetDeclaration() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (152):
+
+    150:     if (CUR_NODE_TYPE == kOperator && CUR_NODE_DATA == kLeftBracket)
+    151:     {
+=>  152:         return GetFuncDeclaration(identificator, type, vars, stk, iter);
+    153:     }
+    154: 
+
+# 9 0x0041D77F in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetExternalDecl() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (113):
+
+    111:     TreeNode *cur_unit = OP_CTOR(kEndOfLine);
+    112: 
+=>  113:     cur_unit->left = GetDeclaration(vars, stk, iter);
+    114: 
+    115: DPR
+
+#10 0x0041D6EE in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetSyntaxTree() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (62):
+
+     60:     size_t i = 0;
+     61: 
+=>   62:     TreeNode *node = GetExternalDecl(vars, &lexems, &i);;
+     63: 
+     64:     SetParents(node);
+
+#11 0x0041C4CE in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: main() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/main.cpp (26):
+
+     24:     }
+     25: 
+=>   26:     l_elems.syntax_tree.root = GetSyntaxTree(&l_elems.vars, argv[1]);
+     27: 
+     28:     GRAPH_DUMP_TREE(&l_elems.syntax_tree);
+
+--------------------------------------------------
+Developed with:
+
+The Dumb Artist Library (TX Library)
+TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400]
+Copyright (C) Ded (Ilya Dedinsky, http://txlib.ru) <mail@txlib.ru>
+See license on: http://txlib.ru
+
+TXLib file:	d:\postuplenie\codeblocks\mingw\include\txlib.h
+Compiled:	Jan 30 2024 18:46:39, GNU g++ 4.8.1, std=201103L, MinGW Runtime 3.20, 32-bit, Debug
+Started:	Jan 30 2024 19:50:14
+
+Run file:	D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe
+Directory:	D:\postuplenie\treniruys\FilyakLanguage
+
+--------------------------------------------------
+
+--------------------------------------------------
+TXLib соболезнует...
+
+Программа: D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe,
+
+ВНЕЗАПНО: signal (11, 0x00): SIGSEGV: Доступ по неверному указателю. Ставяте ассертя! 
+
+Нарушение доступа к памяти.
+
+#1: Исключение EXCEPTION_ACCESS_VIOLATION (0xC0000005) при вяполнении кода по адресу 0x0041E93C в функции GetParams() в файле D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp на строке 508. Попятка записатя данняе по адресу 0x00000014 в модуле D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe. Спасибо _txVectoredExceptionHandler(), что сообщил. Люблю его <3
+
+С помощяю функции signal() вя можете сами обработатя эту ошибку.
+
+#2: TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400], Instance: 0x004FC2FC (32-bit), Flags: CmdrE0, Thread: 0x242C (Main), GetLastError(): 183 (Невозможно создать файл, так как он уже существует). 
+
+--------------------------------------------------
+Стек вязовов:
+
+# 0 0x0041E93C in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetParams() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (508):
+
+    506:     {
+    507: 
+=>  508:         param->right = CUR_NODE;
+    509: DPR
+    510: 
+
+# 1 0x0041E7AC in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetFuncCall() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (478):
+
+    476:     GO_TO_NEXT_TOKEN;
+    477: 
+=>  478:     return CALL_CTOR(identificator_node, GetParams(vars, stk, iter));
+    479: }
+    480: 
+
+# 2 0x0041EDFC in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetInstruction() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (572):
+
+    570:         {
+    571: DPR
+=>  572:             TreeNode *call_tree = GetFuncCall(vars, stk, iter);
+    573: 
+    574:             GO_TO_NEXT_TOKEN;
+
+# 3 0x0041EBB7 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetInstructionList() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (538):
+
+    536: DPR
+    537: 
+=>  538:     cur_instruction->left = GetInstruction(vars, stk, iter);
+    539: 
+    540:     TreeNode *instructions = cur_instruction;
+
+# 4 0x0041F0FC in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetChoiceInstruction() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (629):
+
+    627: 
+    628:     choice_node->left  = GetCondition      (vars, stk, iter);
+=>  629:     choice_node->right = GetInstructionList(vars, stk, iter);
+    630: 
+    631:     return choice_node;
+
+# 5 0x0041EEC9 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetInstruction() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (585):
+
+    583:     else if (CUR_NODE_TYPE == kOperator && CUR_NODE_DATA == kIf)//not ony if
+    584:     {
+=>  585:         return GetChoiceInstruction(vars, stk, iter);
+    586:     }
+    587:     else if (CUR_NODE_TYPE == kOperator && IsCycleKeyWord(CUR_NODE_DATA))
+
+# 6 0x0041EC43 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetInstructionList() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (549):
+
+    547: DPR
+    548: 
+=>  549:         cur_instruction->left = GetInstruction(vars, stk, iter);
+    550: DPR
+    551:     }
+
+# 7 0x0041DB21 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetFuncDeclaration() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (192):
+
+    190:     params->left = GetDeclarationList(vars, stk, iter);
+    191: DPR
+=>  192:     params->right = GetInstructionList(vars, stk, iter);
+    193: DPR
+    194:     decl->right = params;
+
+# 8 0x0041D90A in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetDeclaration() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (152):
+
+    150:     if (CUR_NODE_TYPE == kOperator && CUR_NODE_DATA == kLeftBracket)
+    151:     {
+=>  152:         return GetFuncDeclaration(identificator, type, vars, stk, iter);
+    153:     }
+    154: 
+
+# 9 0x0041D77F in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetExternalDecl() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (113):
+
+    111:     TreeNode *cur_unit = OP_CTOR(kEndOfLine);
+    112: 
+=>  113:     cur_unit->left = GetDeclaration(vars, stk, iter);
+    114: 
+    115: DPR
+
+#10 0x0041D6EE in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetSyntaxTree() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (62):
+
+     60:     size_t i = 0;
+     61: 
+=>   62:     TreeNode *node = GetExternalDecl(vars, &lexems, &i);;
+     63: 
+     64:     SetParents(node);
+
+#11 0x0041C4CE in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: main() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/main.cpp (26):
+
+     24:     }
+     25: 
+=>   26:     l_elems.syntax_tree.root = GetSyntaxTree(&l_elems.vars, argv[1]);
+     27: 
+     28:     GRAPH_DUMP_TREE(&l_elems.syntax_tree);
+
+--------------------------------------------------
+Developed with:
+
+The Dumb Artist Library (TX Library)
+TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400]
+Copyright (C) Ded (Ilya Dedinsky, http://txlib.ru) <mail@txlib.ru>
+See license on: http://txlib.ru
+
+TXLib file:	d:\postuplenie\codeblocks\mingw\include\txlib.h
+Compiled:	Jan 30 2024 18:46:39, GNU g++ 4.8.1, std=201103L, MinGW Runtime 3.20, 32-bit, Debug
+Started:	Jan 30 2024 19:50:14
+
+Run file:	D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe
+Directory:	D:\postuplenie\treniruys\FilyakLanguage
+
+--------------------------------------------------
+
+--------------------------------------------------
+TXLib предупреждает:
+
+Программа: D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe,
+
+ВНЕЗАПНО: Нарушение доступа к памяти.
+
+#1: Исключение EXCEPTION_ACCESS_VIOLATION (0xC0000005) при вяполнении кода по адресу 0x0041EC76 в функции GetInstructionList() в файле D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp на строке 540. Попятка прочестя данняе по адресу 0x0BADBABA в модуле D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe. Спасибо _txVectoredExceptionHandler(), что сообщил. Люблю его <3
+
+#1: TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400], Instance: 0x004FC2FC (32-bit), Flags: CmdrE0, Thread: 0x172C (Main). 
+
+--------------------------------------------------
+Стек вязовов:
+
+# 0 0x0041EC76 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetInstructionList() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (540):
+
+    538:     TreeNode *instructions = cur_instruction;
+    539: 
+=>  540:     while (CUR_NODE_DATA != kRightZoneBracket)
+    541:     {
+    542:         cur_instruction->right = OP_CTOR(kEndOfLine);
+
+# 1 0x0041DB21 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetFuncDeclaration() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (192):
+
+    190:     params->left = GetDeclarationList(vars, stk, iter);
+    191: DPR
+=>  192:     params->right = GetInstructionList(vars, stk, iter);
+    193: DPR
+    194:     decl->right = params;
+
+# 2 0x0041D90A in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetDeclaration() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (152):
+
+    150:     if (CUR_NODE_TYPE == kOperator && CUR_NODE_DATA == kLeftBracket)
+    151:     {
+=>  152:         return GetFuncDeclaration(identificator, type, vars, stk, iter);
+    153:     }
+    154: 
+
+# 3 0x0041D77F in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetExternalDecl() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (113):
+
+    111:     TreeNode *cur_unit = OP_CTOR(kEndOfLine);
+    112: 
+=>  113:     cur_unit->left = GetDeclaration(vars, stk, iter);
+    114: 
+    115: DPR
+
+# 4 0x0041D6EE in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetSyntaxTree() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (62):
+
+     60:     size_t i = 0;
+     61: 
+=>   62:     TreeNode *node = GetExternalDecl(vars, &lexems, &i);;
+     63: 
+     64:     SetParents(node);
+
+# 5 0x0041C4CE in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: main() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/main.cpp (26):
+
+     24:     }
+     25: 
+=>   26:     l_elems.syntax_tree.root = GetSyntaxTree(&l_elems.vars, argv[1]);
+     27: 
+     28:     GRAPH_DUMP_TREE(&l_elems.syntax_tree);
+
+--------------------------------------------------
+Developed with:
+
+The Dumb Artist Library (TX Library)
+TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400]
+Copyright (C) Ded (Ilya Dedinsky, http://txlib.ru) <mail@txlib.ru>
+See license on: http://txlib.ru
+
+TXLib file:	d:\postuplenie\codeblocks\mingw\include\txlib.h
+Compiled:	Jan 30 2024 21:19:34, GNU g++ 4.8.1, std=201103L, MinGW Runtime 3.20, 32-bit, Debug
+Started:	Jan 30 2024 21:19:41
+
+Run file:	D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe
+Directory:	D:\postuplenie\treniruys\FilyakLanguage
+
+--------------------------------------------------
+
+--------------------------------------------------
+TXLib соболезнует...
+
+Программа: D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe,
+
+ВНЕЗАПНО: signal (11, 0x00): SIGSEGV: Доступ по неверному указателю. Ставяте ассертя! 
+
+Нарушение доступа к памяти.
+
+#1: Исключение EXCEPTION_ACCESS_VIOLATION (0xC0000005) при вяполнении кода по адресу 0x0041EC76 в функции GetInstructionList() в файле D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp на строке 540. Попятка прочестя данняе по адресу 0x0BADBABA в модуле D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe. Спасибо _txVectoredExceptionHandler(), что сообщил. Люблю его <3
+
+С помощяю функции signal() вя можете сами обработатя эту ошибку.
+
+#2: TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400], Instance: 0x004FC2FC (32-bit), Flags: CmdrE0, Thread: 0x172C (Main). 
+
+--------------------------------------------------
+Стек вязовов:
+
+# 0 0x0041EC76 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetInstructionList() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (540):
+
+    538:     TreeNode *instructions = cur_instruction;
+    539: 
+=>  540:     while (CUR_NODE_DATA != kRightZoneBracket)
+    541:     {
+    542:         cur_instruction->right = OP_CTOR(kEndOfLine);
+
+# 1 0x0041DB21 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetFuncDeclaration() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (192):
+
+    190:     params->left = GetDeclarationList(vars, stk, iter);
+    191: DPR
+=>  192:     params->right = GetInstructionList(vars, stk, iter);
+    193: DPR
+    194:     decl->right = params;
+
+# 2 0x0041D90A in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetDeclaration() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (152):
+
+    150:     if (CUR_NODE_TYPE == kOperator && CUR_NODE_DATA == kLeftBracket)
+    151:     {
+=>  152:         return GetFuncDeclaration(identificator, type, vars, stk, iter);
+    153:     }
+    154: 
+
+# 3 0x0041D77F in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetExternalDecl() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (113):
+
+    111:     TreeNode *cur_unit = OP_CTOR(kEndOfLine);
+    112: 
+=>  113:     cur_unit->left = GetDeclaration(vars, stk, iter);
+    114: 
+    115: DPR
+
+# 4 0x0041D6EE in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetSyntaxTree() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (62):
+
+     60:     size_t i = 0;
+     61: 
+=>   62:     TreeNode *node = GetExternalDecl(vars, &lexems, &i);;
+     63: 
+     64:     SetParents(node);
+
+# 5 0x0041C4CE in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: main() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/main.cpp (26):
+
+     24:     }
+     25: 
+=>   26:     l_elems.syntax_tree.root = GetSyntaxTree(&l_elems.vars, argv[1]);
+     27: 
+     28:     GRAPH_DUMP_TREE(&l_elems.syntax_tree);
+
+--------------------------------------------------
+Developed with:
+
+The Dumb Artist Library (TX Library)
+TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400]
+Copyright (C) Ded (Ilya Dedinsky, http://txlib.ru) <mail@txlib.ru>
+See license on: http://txlib.ru
+
+TXLib file:	d:\postuplenie\codeblocks\mingw\include\txlib.h
+Compiled:	Jan 30 2024 21:19:34, GNU g++ 4.8.1, std=201103L, MinGW Runtime 3.20, 32-bit, Debug
+Started:	Jan 30 2024 21:19:41
+
+Run file:	D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe
+Directory:	D:\postuplenie\treniruys\FilyakLanguage
+
+--------------------------------------------------
+
+--------------------------------------------------
+TXLib предупреждает:
+
+Программа: D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe,
+
+ВНЕЗАПНО: Нарушение доступа к памяти.
+
+#1: Исключение EXCEPTION_ACCESS_VIOLATION (0xC0000005) при вяполнении кода по адресу 0x00420F69 в функции GetLinesCount() в файле D:/postuplenie/treniruys/FilyakLanguage/TextParse/text_parse.cpp на строке 157. Попятка прочестя данняе по адресу 0x01A62000 в модуле D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe. Спасибо _txVectoredExceptionHandler(), что сообщил. Люблю его <3
+
+#1: TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400], Instance: 0x004FC2FC (32-bit), Flags: CmdrE0, Thread: 0x1EFC (Main). 
+
+--------------------------------------------------
+Стек вязовов:
+
+# 0 0x00420F69 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetLinesCount() at D:/postuplenie/treniruys/FilyakLanguage/TextParse/text_parse.cpp (157):
+
+    155:     for (size_t i = 0; *buf != '\0'; ++i)
+    156:     {
+=>  157:         printf("%c", buf[i]);
+    158:         if (*buf == '\n')
+    159:         {
+
+# 1 0x00420D52 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: ReadTextFromFile() at D:/postuplenie/treniruys/FilyakLanguage/TextParse/text_parse.cpp (76):
+
+     74:     }
+     75: 
+=>   76:     text->lines_count = GetLinesCount(text->buf);
+     77: 
+     78:     size_t *line_numbers = (size_t *) calloc(text->lines_count, sizeof(size_t));
+
+# 2 0x0041D68B in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetSyntaxTree() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (51):
+
+     49: 
+     50:     Text              program;
+=>   51:     ReadTextFromFile(&program, file_name);
+     52: 
+     53:     fclose(output_file);
+
+# 3 0x0041C4CE in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: main() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/main.cpp (25):
+
+     23:     }
+     24: 
+=>   25:     l_elems.syntax_tree.root = GetSyntaxTree(&l_elems.vars, argv[1]);
+     26: 
+     27:     GRAPH_DUMP_TREE(&l_elems.syntax_tree);
+
+--------------------------------------------------
+Developed with:
+
+The Dumb Artist Library (TX Library)
+TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400]
+Copyright (C) Ded (Ilya Dedinsky, http://txlib.ru) <mail@txlib.ru>
+See license on: http://txlib.ru
+
+TXLib file:	d:\postuplenie\codeblocks\mingw\include\txlib.h
+Compiled:	Jan 31 2024 03:08:37, GNU g++ 4.8.1, std=201103L, MinGW Runtime 3.20, 32-bit, Debug
+Started:	Jan 31 2024 03:14:31
+
+Run file:	D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe
+Directory:	D:\postuplenie\treniruys\FilyakLanguage
+
+--------------------------------------------------
+
+--------------------------------------------------
+TXLib соболезнует...
+
+Программа: D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe,
+
+ВНЕЗАПНО: signal (11, 0x00): SIGSEGV: Доступ по неверному указателю. Ставяте ассертя! 
+
+Нарушение доступа к памяти.
+
+#1: Исключение EXCEPTION_ACCESS_VIOLATION (0xC0000005) при вяполнении кода по адресу 0x00420F69 в функции GetLinesCount() в файле D:/postuplenie/treniruys/FilyakLanguage/TextParse/text_parse.cpp на строке 157. Попятка прочестя данняе по адресу 0x01A62000 в модуле D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe. Спасибо _txVectoredExceptionHandler(), что сообщил. Люблю его <3
+
+С помощяю функции signal() вя можете сами обработатя эту ошибку.
+
+#2: TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400], Instance: 0x004FC2FC (32-bit), Flags: CmdrE0, Thread: 0x1EFC (Main). 
+
+--------------------------------------------------
+Стек вязовов:
+
+# 0 0x00420F69 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetLinesCount() at D:/postuplenie/treniruys/FilyakLanguage/TextParse/text_parse.cpp (157):
+
+    155:     for (size_t i = 0; *buf != '\0'; ++i)
+    156:     {
+=>  157:         printf("%c", buf[i]);
+    158:         if (*buf == '\n')
+    159:         {
+
+# 1 0x00420D52 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: ReadTextFromFile() at D:/postuplenie/treniruys/FilyakLanguage/TextParse/text_parse.cpp (76):
+
+     74:     }
+     75: 
+=>   76:     text->lines_count = GetLinesCount(text->buf);
+     77: 
+     78:     size_t *line_numbers = (size_t *) calloc(text->lines_count, sizeof(size_t));
+
+# 2 0x0041D68B in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetSyntaxTree() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (51):
+
+     49: 
+     50:     Text              program;
+=>   51:     ReadTextFromFile(&program, file_name);
+     52: 
+     53:     fclose(output_file);
+
+# 3 0x0041C4CE in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: main() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/main.cpp (25):
+
+     23:     }
+     24: 
+=>   25:     l_elems.syntax_tree.root = GetSyntaxTree(&l_elems.vars, argv[1]);
+     26: 
+     27:     GRAPH_DUMP_TREE(&l_elems.syntax_tree);
+
+--------------------------------------------------
+Developed with:
+
+The Dumb Artist Library (TX Library)
+TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400]
+Copyright (C) Ded (Ilya Dedinsky, http://txlib.ru) <mail@txlib.ru>
+See license on: http://txlib.ru
+
+TXLib file:	d:\postuplenie\codeblocks\mingw\include\txlib.h
+Compiled:	Jan 31 2024 03:08:37, GNU g++ 4.8.1, std=201103L, MinGW Runtime 3.20, 32-bit, Debug
+Started:	Jan 31 2024 03:14:31
+
+Run file:	D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe
+Directory:	D:\postuplenie\treniruys\FilyakLanguage
+
+--------------------------------------------------
+
+--------------------------------------------------
+TXLib предупреждает:
+
+Программа: D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe,
+
+ВНЕЗАПНО: Нарушение доступа к памяти.
+
+#1: Исключение EXCEPTION_ACCESS_VIOLATION (0xC0000005) при вяполнении кода по адресу 0x0042170D в функции GetOperation() в файле D:/postuplenie/treniruys/FilyakLanguage/Frontend/lexer.cpp на строке 165. Попятка записатя данняе по адресу NULL в модуле D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe. Спасибо _txVectoredExceptionHandler(), что сообщил. Люблю его <3
+
+#1: TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400], Instance: 0x004FC2FC (32-bit), Flags: CmdrE0, Thread: 0x2900 (Main), GetLastError(): 183 (Невозможно создать файл, так как он уже существует). 
+
+--------------------------------------------------
+Стек вязовов:
+
+# 0 0x0042170D in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetOperation() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/lexer.cpp (165):
+
+    163:     SkipExprSpaces(expr);
+    164: 
+=>  165:     node->line_number = expr->line_number;
+    166: 
+    167:     return node;
+
+# 1 0x004214B6 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetLexem() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/lexer.cpp (89):
+
+     87:     else if (IsOperator(CUR_CHAR))
+     88:     {
+=>   89:         TreeNode *node = GetOperation(expr);
+     90: 
+     91:         if (node == nullptr)
+
+# 2 0x004213C0 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: SplitOnLexems() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/lexer.cpp (46):
+
+     44:         while (expr.string[expr.pos] != '\0')
+     45:         {
+=>   46:             if (GetLexem(stk, &expr, vars) < 0)
+     47:             {
+     48:                 printf("Syntax error. POS: %d, LINE: %d\n", expr.pos + 1, i + 1);
+
+# 3 0x0041D6BA in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetSyntaxTree() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (58):
+
+     56:     StackInit(&lexems);
+     57: 
+=>   58:     SplitOnLexems(&program, &lexems, vars);
+     59: 
+     60:     size_t i = 0;
+
+# 4 0x0041C4CE in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: main() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/main.cpp (25):
+
+     23:     }
+     24: 
+=>   25:     l_elems.syntax_tree.root = GetSyntaxTree(&l_elems.vars, argv[1]);
+     26: 
+     27:     GRAPH_DUMP_TREE(&l_elems.syntax_tree);
+
+--------------------------------------------------
+Developed with:
+
+The Dumb Artist Library (TX Library)
+TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400]
+Copyright (C) Ded (Ilya Dedinsky, http://txlib.ru) <mail@txlib.ru>
+See license on: http://txlib.ru
+
+TXLib file:	d:\postuplenie\codeblocks\mingw\include\txlib.h
+Compiled:	Jan 31 2024 03:08:37, GNU g++ 4.8.1, std=201103L, MinGW Runtime 3.20, 32-bit, Debug
+Started:	Jan 31 2024 15:41:15
+
+Run file:	D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe
+Directory:	D:\postuplenie\treniruys\FilyakLanguage
+
+--------------------------------------------------
+
+--------------------------------------------------
+TXLib соболезнует...
+
+Программа: D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe,
+
+ВНЕЗАПНО: signal (11, 0x00): SIGSEGV: Доступ по неверному указателю. Ставяте ассертя! 
+
+Нарушение доступа к памяти.
+
+#1: Исключение EXCEPTION_ACCESS_VIOLATION (0xC0000005) при вяполнении кода по адресу 0x0042170D в функции GetOperation() в файле D:/postuplenie/treniruys/FilyakLanguage/Frontend/lexer.cpp на строке 165. Попятка записатя данняе по адресу NULL в модуле D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe. Спасибо _txVectoredExceptionHandler(), что сообщил. Люблю его <3
+
+С помощяю функции signal() вя можете сами обработатя эту ошибку.
+
+#2: TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400], Instance: 0x004FC2FC (32-bit), Flags: CmdrE0, Thread: 0x2900 (Main), GetLastError(): 183 (Невозможно создать файл, так как он уже существует). 
+
+--------------------------------------------------
+Стек вязовов:
+
+# 0 0x0042170D in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetOperation() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/lexer.cpp (165):
+
+    163:     SkipExprSpaces(expr);
+    164: 
+=>  165:     node->line_number = expr->line_number;
+    166: 
+    167:     return node;
+
+# 1 0x004214B6 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetLexem() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/lexer.cpp (89):
+
+     87:     else if (IsOperator(CUR_CHAR))
+     88:     {
+=>   89:         TreeNode *node = GetOperation(expr);
+     90: 
+     91:         if (node == nullptr)
+
+# 2 0x004213C0 in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: SplitOnLexems() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/lexer.cpp (46):
+
+     44:         while (expr.string[expr.pos] != '\0')
+     45:         {
+=>   46:             if (GetLexem(stk, &expr, vars) < 0)
+     47:             {
+     48:                 printf("Syntax error. POS: %d, LINE: %d\n", expr.pos + 1, i + 1);
+
+# 3 0x0041D6BA in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: GetSyntaxTree() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/parse.cpp (58):
+
+     56:     StackInit(&lexems);
+     57: 
+=>   58:     SplitOnLexems(&program, &lexems, vars);
+     59: 
+     60:     size_t i = 0;
+
+# 4 0x0041C4CE in D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe: main() at D:/postuplenie/treniruys/FilyakLanguage/Frontend/main.cpp (25):
+
+     23:     }
+     24: 
+=>   25:     l_elems.syntax_tree.root = GetSyntaxTree(&l_elems.vars, argv[1]);
+     26: 
+     27:     GRAPH_DUMP_TREE(&l_elems.syntax_tree);
+
+--------------------------------------------------
+Developed with:
+
+The Dumb Artist Library (TX Library)
+TXLib [Ver: 00173a, Rev: 171, Date: 2022-07-23 02:08:28 +0400]
+Copyright (C) Ded (Ilya Dedinsky, http://txlib.ru) <mail@txlib.ru>
+See license on: http://txlib.ru
+
+TXLib file:	d:\postuplenie\codeblocks\mingw\include\txlib.h
+Compiled:	Jan 31 2024 03:08:37, GNU g++ 4.8.1, std=201103L, MinGW Runtime 3.20, 32-bit, Debug
+Started:	Jan 31 2024 15:41:15
+
+Run file:	D:\postuplenie\treniruys\FilyakLanguage\Frontend.exe
+Directory:	D:\postuplenie\treniruys\FilyakLanguage
+
+--------------------------------------------------

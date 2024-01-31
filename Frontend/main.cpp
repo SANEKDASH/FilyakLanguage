@@ -2,13 +2,14 @@
 #include "parse.h"
 #include "../Common/trees.h"
 #include "../Common/tree_dump.h"
-
-
+#include "TXlib.h"
 
 int main(int argc, char *argv[])
 {
-    InitTreeGraphDump();
+    txSetLocale();
+    txDisableAutoPause();
 
+    InitTreeGraphDump();
 
     LanguageElems l_elems = {0};
 
@@ -24,7 +25,6 @@ int main(int argc, char *argv[])
     l_elems.syntax_tree.root = GetSyntaxTree(&l_elems.vars, argv[1]);
 
     GRAPH_DUMP_TREE(&l_elems.syntax_tree);
-    printf("GUY");
 
     printf("TREE ROOT %p\n", l_elems.syntax_tree.root);
 

@@ -41,9 +41,6 @@ static void HashStack(Stack *stk);
 
 static unsigned long long HashFunc(const void *data, size_t count);
 
-static size_t GetNameTablePos(size_t code);
-
-
 CANARY_ON(
           static CanaryType_t *GetLeftDataCanaryPtr(const Stack *stk)
           {
@@ -280,7 +277,7 @@ StackErr_t Pop(Stack *stk, StackElemType_t *ret_value)
     return stk->stack_data.status;
 }
 
-static size_t GetNameTablePos(size_t code)
+size_t GetNameTablePos(size_t code)
 {
     for (size_t i = 0; i < kKeyWordCount; i++)
     {
@@ -355,28 +352,30 @@ void StackDump(const Stack *stk, LogInfo info)
                 if (stk->stack_data.data[i] != nullptr)
                 {
                     fprintf(LogFile, "\t\t[%d] = [pointer - %p]\n", i, stk->stack_data.data[i]);
-                    fprintf(LogFile,"\t\t |\n");
+                    fprintf(LogFile, "\t\t |\n");
+                    fprintf(LogFile, "\t\t +--[LINE - %d]-->", stk->stack_data.data[i]->line_number);
+
                     switch (stk->stack_data.data[i]->type)
                     {
                         case kOperator:
                         {
                             size_t pos = GetNameTablePos(stk->stack_data.data[i]->data.key_word_code);
 
-                            fprintf(LogFile, "\t\t +---->op - \"%s\"\n\n", NameTable[pos].key_word);
+                            fprintf(LogFile, "op - \"%s\"\n\n", NameTable[pos].key_word);
 
                             break;
                         }
 
                         case kIdentificator:
                         {
-                            fprintf(LogFile, "\t\t +---->variable - %d\n\n", stk->stack_data.data[i]->data.variable_pos);
+                            fprintf(LogFile, "variable - %d\n\n", stk->stack_data.data[i]->data.variable_pos);
 
                             break;
                         }
 
                         case kConstNumber:
                         {
-                            fprintf(LogFile, "\t\t +---->const number - %lg\n\n", stk->stack_data.data[i]->data.const_val);
+                            fprintf(LogFile, "const number - %lg\n\n", stk->stack_data.data[i]->data.const_val);
 
                             break;
                         }
@@ -387,7 +386,7 @@ void StackDump(const Stack *stk, LogInfo info)
 
                         default:
                         {
-                            printf("KAVO (stack dump)\n");
+                            printf("KAVO (stack dump): unknown type: %d\n", stk->stack_data.data[i]->type);
 
                             return;
 
