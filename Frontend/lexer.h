@@ -13,6 +13,6 @@ typedef enum
 
 LexerErrs_t SplitOnLexems(Text *text,
                           Stack *stk,
-                          Variables *vars);
+                          Identificators *vars);
 
 #endif

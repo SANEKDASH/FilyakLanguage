@@ -4,33 +4,69 @@
 #include "../TextParse/text_parse.h"
 #include "NameTable.h"
 
+#ifdef TABLES_DEBUG
+#define TABLES_DUMP(tables) DumpNameTables(tables, __func__, __LINE__)
+#else
+#define TABLES_DUMP(tables)
+#endif
+
 typedef double VarType_t;
+
+typedef enum
+{
+    kVar       = 1,
+    kFunc      = 2,
+    kType      = 4,
+    kUndefined = 3,
+} IdType_t;
 
 struct Expr
 {
-    const char *string = nullptr;
+    char *string = nullptr;
     size_t pos;
     size_t line_number;
 };
 
-typedef enum
+struct Name
 {
-    kVar,
-    kFunc,
-    kUndefined,
-} IdType_t;
+    size_t   pos;
+    IdType_t type;
+};
 
-struct Variable
+struct TableOfNames
+{
+    Name *names;
+
+    size_t capacity;
+    size_t name_count;
+
+    int func_code;
+
+    size_t pos;
+};
+
+struct NameTables
+{
+    TableOfNames **name_tables;
+
+    size_t main_id_pos;
+
+    size_t capacity;
+    size_t tables_count;
+};
+
+
+struct Identificator
 {
     const char *id = nullptr;
     bool        declaration_state;
     IdType_t    id_type;
 };
 
-struct Variables
+struct Identificators
 {
     VarType_t type;
-    Variable *var_array;
+    Identificator *var_array;
     size_t size;
     size_t var_count;
 };
@@ -49,6 +85,9 @@ typedef enum
     kTreeOptimized,
     kTreeNotOptimized,
     kNullTree,
+    kMissingMain,
+    kUnknownType,
+    kUnknownKeyCode
 } TreeErrs_t;
 
 union NodeData
@@ -80,17 +119,41 @@ struct Tree
 
 struct LanguageElems
 {
-    Variables vars;
-    Tree      syntax_tree;
+    Identificators vars;
+
+    NameTables tables;
+
+    Tree syntax_tree;
 };
 
-int VarArrayDtor(Variables *vars);
+int NameTablesInit(NameTables *name_tables);
 
-int AddVar(Variables *vars, const char *var_name);
+int DumpNameTables(NameTables *tables,
+                   const char *func,
+                   int         line);
 
-int SeekVariable(Variables *vars, const char *var_name);
+int CloseNamesLog();
 
-int VarArrayInit(Variables *vars);
+int InitNamesLog();
+
+TableOfNames *AddTableOfNames(NameTables *tables,
+                              int         func_code);
+
+int TablesOfNamesInit(TableOfNames *table,
+                      int           func_code);
+int AddName(TableOfNames *table,
+            size_t        id,
+            IdType_t      type);
+
+int VarArrayDtor(Identificators *vars);
+
+int AddVar(Identificators *vars,
+           const char     *var_name);
+
+int SeekVariable(Identificators *vars,
+                 const char     *var_name);
+
+int VarArrayInit(Identificators *vars);
 
 TreeErrs_t LanguageElemsInit(LanguageElems *l_elems);
 
@@ -108,15 +171,15 @@ TreeNode *NodeCtor(TreeNode         *parent_node,
 
 TreeErrs_t TreeDtor(TreeNode *root);
 
-TreeErrs_t PrintTreeInFile(Tree       *tree,
-                           Variables  *vars,
-                           const char *file_name);
+TreeErrs_t PrintTreeInFile(LanguageElems *l_elems,
+                           const char    *file_name);
 
 TreeErrs_t ReadLanguageElemsOutOfFile(LanguageElems *l_elems,
-                                      const char    *file_name);
+                                      const char    *tree_file_name,
+                                      const char    *tables_file);
 
 TreeNode *CopyNode(const TreeNode *src_node,
-                   TreeNode       *parent_node);
+                         TreeNode *parent_node);
 
 TreeErrs_t SetParents(TreeNode *parent_node);
 

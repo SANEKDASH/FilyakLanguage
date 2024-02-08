@@ -1,8 +1,6 @@
 #ifndef TREE_DUMP_HEADER
 #define TREE_DUMP_HEADER
 
-#define DEBUG
-
 #include "trees.h"
 #include "../Frontend/parse.h"
 

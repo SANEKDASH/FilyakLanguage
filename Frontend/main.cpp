@@ -26,17 +26,20 @@ int main(int argc, char *argv[])
 
     GRAPH_DUMP_TREE(&l_elems.syntax_tree);
 
-    printf("TREE ROOT %p\n", l_elems.syntax_tree.root);
-
     EndTreeGraphDump();
 
-    PrintTreeInFile(&l_elems.syntax_tree,
-                    &l_elems.vars,
-                    "tree_save.txt");
+    if (PrintTreeInFile(&l_elems, "tree_save.txt") != kTreeSuccess)
+    {
+        printf(">>Я не буду компилить, долбооеоооб.\n");
+
+        LanguageElemsDtor(&l_elems);
+
+        return -1;
+    }
 
     LanguageElemsDtor(&l_elems);
 
-    printf(">>Successfuly compiled file : \"%s\".", argv[1]);
+    printf(">>Так уж и быть, скомпилю тебе это дерьмо: \"%s\".\n", argv[1]);
 
     return 0;
 }

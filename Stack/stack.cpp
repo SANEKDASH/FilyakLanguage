@@ -368,7 +368,7 @@ void StackDump(const Stack *stk, LogInfo info)
 
                         case kIdentificator:
                         {
-                            fprintf(LogFile, "variable - %d\n\n", stk->stack_data.data[i]->data.variable_pos);
+                            fprintf(LogFile, "Identificator - %d\n\n", stk->stack_data.data[i]->data.variable_pos);
 
                             break;
                         }
@@ -380,6 +380,7 @@ void StackDump(const Stack *stk, LogInfo info)
                             break;
                         }
 
+                        case kFuncDef:
                         case kParamsNode:
                         case kVarDecl:
                         case kCall:

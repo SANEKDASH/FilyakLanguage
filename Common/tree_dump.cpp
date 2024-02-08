@@ -82,7 +82,7 @@ TreeErrs_t GraphDumpTree(Tree *tree,
               "\trankdir = TB;\n"
               "\tgraph [bgcolor = \"black\"]\n"
               "\tnode[color =\"black\", fontsize=14, shape = Mrecord];\n"
-              "\tedge[color = \"red\", fontcolor = \"blue\",fontsize = 12];\n\n\n");
+              "\tedge[color = \"orange\", fontcolor = \"blue\",fontsize = 12];\n\n\n");
 
     LogPrintTree(tree->root, dot_file);
 

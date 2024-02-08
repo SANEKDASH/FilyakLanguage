@@ -1,11 +1,13 @@
 #ifndef NAME_TABLE_HEADER
 #define NAME_TABLE_HEADER
 
+static const char *kMainFuncName = "аганим";
+
 typedef enum
 {
-    kOperator       = 1,
-    kConstNumber    = 2,
-    kIdentificator  = 3,
+    kConstNumber    = 1,
+    kIdentificator  = 2,
+    kOperator       = 3,
     kFuncDef        = 4,
     kParamsNode     = 5,
     kVarDecl        = 6,
@@ -20,7 +22,6 @@ typedef enum
     kRightBracket     = 2, //ШШ Ш ШШШШШШШШШ, ШШ Ш Ш ШШШШШШ ШШ ШШШ
     kLeftZoneBracket  = 3, //ШШ Ш ШШШШШШШШШ, ШШ Ш Ш ШШШШШШ ШШ ШШШ
     kRightZoneBracket = 4, //ШШ Ш ШШШШШШШШШ, ШШ Ш Ш ШШШШШШ ШШ ШШШ
-    kDoubleType       = 5,
 
     kIf               = 11, // if
     kWhile            = 12, // while
@@ -48,12 +49,16 @@ typedef enum
     kEndOfLine        = 41,
     kEnumOp           = 42,
 
+    kDoubleType       = 51,
+
     kPrint            = 62,
     kScan             = 61,
 
+    kReturn           = 71, // return
     kBreak            = 72, // break
     kContinue         = 73, // continue
-    kReturn           = 71, // return
+    kAbort            = 74,
+
 } KeyCode_t;
 
 struct KeyWord
@@ -71,11 +76,11 @@ static const KeyWord NameTable[]=
     "сплитим_на"            ,kDiv,              10,
     "углы_вымер€ет"         ,kSin,              13,
     "это_преломлени€_бл€ть" ,kCos,              21,
-    "целует_пол"            ,kFloor,            10,
+    "целуй_пол_сука"        ,kFloor,            14,
     "реквием"               ,kDiff,             7,
     "трент_ультует"         ,kSqrt,             13,
     "???"                   ,kIf,               3,
-    "while"                 ,kWhile,            5,
+    "пока"                  ,kWhile,            4,
     "ты"                    ,kAssign,           2,
     "больше"                ,kMore,             6,
     "меньше"                ,kLess,             6,
@@ -96,9 +101,11 @@ static const KeyWord NameTable[]=
     "?"                     ,kEndOfLine,        1,
     "долбоеб"               ,kDoubleType,       7,
     "пишу_твоей_матери"     ,kPrint,            17,
-    "скажи_мне"             ,kScan,             9
+    "скажи_мне"             ,kScan,             9,
+    "иди_нахуй"             ,kAbort,            9
 };
 
+static const size_t EndOfLinePos = 28;
 
 static const size_t kKeyWordCount = sizeof(NameTable) / sizeof(KeyWord);
 

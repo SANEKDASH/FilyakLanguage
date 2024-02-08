@@ -8,13 +8,13 @@
 
 static TreeNode *GetOperation    (Expr *expr);
 static TreeNode *GetNumber       (Expr *expr);
-static TreeNode *GetOperation    (Expr *expr);
-static TreeNode *GetIdentificator(Expr      *expr,
-                                  Variables *vars);
 
-static int GetLexem(Stack     *stk,
-                    Expr      *expr,
-                    Variables *vars);
+static TreeNode *GetIdentificator(Expr           *expr,
+                                  Identificators *vars);
+
+static int GetLexem(Stack          *stk,
+                    Expr           *expr,
+                    Identificators *vars);
 
 static void SkipExprSpaces(Expr *expr);
 
@@ -22,16 +22,16 @@ static bool RusIsalpha(char c);
 
 static bool IsOperator(char c);
 
+static int MissComment(char *string);
+
 //==============================================================================
 
 
 LexerErrs_t SplitOnLexems(Text      *text,
                           Stack     *stk,
-                          Variables *vars)
+                          Identificators *vars)
 {
     InitLog();
-
-    #define CUR_CHAR *text->lines_ptr[i]
 
     for (size_t i = 0; i < text->lines_count; i++)
     {
@@ -40,6 +40,8 @@ LexerErrs_t SplitOnLexems(Text      *text,
         expr.pos         = 0;
         expr.string      = text->lines_ptr[i].str;
         expr.line_number = text->lines_ptr[i].real_line_number;
+
+        MissComment(expr.string);
 
         while (expr.string[expr.pos] != '\0')
         {
@@ -59,6 +61,20 @@ LexerErrs_t SplitOnLexems(Text      *text,
 
 //==============================================================================
 
+static int MissComment(char *string)
+{
+    char *comment = strchr(string, '#');
+
+    if (comment != nullptr)
+    {
+        *comment = '\0';
+    }
+
+    return 0;
+}
+
+//==============================================================================
+
 #define OP_CTOR(op_code) NodeCtor(nullptr, nullptr       ,nullptr, kOperator,      op_code)
 #define NUM_CTOR(val)    NodeCtor(nullptr, nullptr       ,nullptr, kConstNumber,   val)
 #define ID_CTOR(pos)     NodeCtor(nullptr, nullptr       ,nullptr, kIdentificator, pos)
@@ -72,13 +88,11 @@ LexerErrs_t SplitOnLexems(Text      *text,
 
 //==============================================================================
 
-static int GetLexem(Stack     *stk,
-                    Expr      *expr,
-                    Variables *vars)
+static int GetLexem(Stack          *stk,
+                    Expr           *expr,
+                    Identificators *vars)
 {
     SkipExprSpaces(expr);
-
-    TreeNode *node = nullptr;
 
     if (isdigit(CUR_CHAR) || CUR_CHAR == '-')
     {
@@ -101,7 +115,7 @@ static int GetLexem(Stack     *stk,
     else
     {
         printf(">>LINE %d:\n"
-               "  Что ты блять пишешь? '%s'\n", STRING);
+               "  Что ты блять пишешь? '%s'\n", expr->line_number, STRING);
         return -1;
     }
 
@@ -151,9 +165,9 @@ static TreeNode *GetOperation(Expr *expr)
 
     for (size_t i = 0; i < kKeyWordCount; i++)
     {
-        if (strncmp(expr->string + expr->pos,
-                    NameTable[i].key_word,
-                    NameTable[i].word_len) == 0)
+        if ((strncmp(expr->string + expr->pos, NameTable[i].key_word, NameTable[i].word_len) == 0) &&
+            (isspace(*(expr->string + expr->pos + NameTable[i].word_len)) ||
+                     *(expr->string + expr->pos + NameTable[i].word_len) == '\0'))
         {
             node = OP_CTOR(NameTable[i].key_code);
 
@@ -173,7 +187,7 @@ static TreeNode *GetOperation(Expr *expr)
 static const int kMaxIdLen = 64;
 
 static TreeNode *GetIdentificator(Expr      *expr,
-                                  Variables *vars)
+                                  Identificators *vars)
 {
     SkipExprSpaces(expr);
 
@@ -183,9 +197,10 @@ static TreeNode *GetIdentificator(Expr      *expr,
 
     size_t i = 0;
 
-    while (isalpha   (CUR_CHAR)    ||
-           RusIsalpha(CUR_CHAR)    ||
-                      CUR_CHAR == '_')
+    while (isalpha   (CUR_CHAR)       ||
+           RusIsalpha(CUR_CHAR)       ||
+                      CUR_CHAR == '_' ||
+           isdigit   (CUR_CHAR)         )
     {
         var_name[i++] = CUR_CHAR;
 

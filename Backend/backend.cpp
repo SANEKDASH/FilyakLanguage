@@ -2,18 +2,56 @@
 
 #include "backend.h"
 
-static const char *main_func_name = "‡„‡ÌËÏ";
+static const char *main_func_name = "–∞–≥–∞–Ω–∏–º";
 
-static TreeErrs_t AssembleOp(const TreeNode  *node,
-                             const Variables *vars,
-                             FILE            *output_file);
+static TreeErrs_t AssembleOp(const TreeNode      *node,
+                             const LanguageElems *l_elems,
+                             TableOfNames        *cur_table,
+                             FILE                *output_file);
 
 
 static TreeErrs_t AsmFuncs(TreeNode      *cur_func,
                            LanguageElems *l_elems,
+                           TableOfNames  *cur_table,
                            FILE          *output_file);
 
-static size_t condition_count = 0;
+static TreeErrs_t AsmOperator(const TreeNode      *node,
+                              const LanguageElems *l_elems,
+                              TableOfNames        *cur_table,
+                              FILE                *output_file);
+
+static TreeErrs_t AsmParams(const TreeNode      *node,
+                            const LanguageElems *l_elems,
+                            TableOfNames        *cur_table,
+                            FILE                *output_file);
+
+static TreeErrs_t AsmExternalDeclarations(TreeNode      *cur_node,
+                                          LanguageElems *l_elems,
+                                          TableOfNames  *cur_table,
+                                          FILE          *output_file);
+
+static size_t GetVarPos(TableOfNames *table,
+                        size_t        var_id_pos);
+
+static size_t if_count         = 0;
+static size_t logical_op_count = 0;
+static size_t cycle_op_count   = 0;
+
+
+//==============================================================================
+
+static size_t GetVarPos(TableOfNames *table,
+                        size_t        var_id_pos)
+{
+    for (size_t i = 0; i < table->name_count; i++)
+    {
+        if (var_id_pos == table->names[i].pos)
+        {
+            return i;
+        }
+    }
+    return 0;
+}
 
 //==============================================================================
 
@@ -33,9 +71,7 @@ TreeErrs_t MakeAsmCode(LanguageElems *l_elems,
 
     TreeNode *curr_op = l_elems->syntax_tree.root;
 
-    AsmFuncs(l_elems->syntax_tree.root, l_elems, output_file);
-
-
+    AsmExternalDeclarations(l_elems->syntax_tree.root, l_elems, l_elems->tables.name_tables[0], output_file);
 
     fclose(output_file);
 
@@ -44,72 +80,24 @@ TreeErrs_t MakeAsmCode(LanguageElems *l_elems,
 
 //==============================================================================
 
-static TreeErrs_t AsmMain(LanguageElems *l_elems,
-                          FILE          *output_file)
-{
-    #define ASM_PRINT(...) fprintf(output_file, __VA_ARGS__)
-    #define ASM_NODE(node) AssembleOp(node, vars, output_file)
-
-    TreeNode *func = l_elems->syntax_tree.root->left;
-
-    ASM_PRINT("jmp %s\n", l_elems->vars.var_array[func->data.variable_pos].id);
-    ASM_PRINT("%s:\n");
-
-    func = func->right->right;
-//òòòòòòòòò
-    while (func != nullptr)
-    {
-        AssembleOp(func->left, &l_elems->vars, output_file);
-
-        func = func->right;
-    }
-
-    ASM_PRINT("\nhlt\n\n");
-
-    return kTreeSuccess;
-}
+#define ASM_PRINT(...) fprintf(output_file, __VA_ARGS__)
+#define ASM_NODE(node) AssembleOp(node, l_elems, cur_table, output_file)
 
 //==============================================================================
 
-static TreeErrs_t AsmFuncs(TreeNode      *cur_func,
-                           LanguageElems *l_elems,
-                           FILE          *output_file)
+static TreeErrs_t AsmExternalDeclarations(TreeNode      *cur_node,
+                                          LanguageElems *l_elems,
+                                          TableOfNames  *cur_table,
+                                          FILE          *output_file)
 
 {
-    TreeNode *func      = cur_func;
-    TreeNode *next_func = func->right;
+    TreeNode *decl_node = cur_node;
 
-    if (func != nullptr)
+    while (decl_node != nullptr)
     {
-    printf("HUY %d\n", __LINE__);
-        func = func->left;
+        ASM_NODE(decl_node->left);
 
-        const char *func_name = l_elems->vars.var_array[func->data.variable_pos].id;
-
-        ASM_PRINT("\n\n\n%s:\n", func_name);
-
-        func = func->right->right;
-
-        while (func != nullptr)
-        {
-            AssembleOp(func->left, &l_elems->vars, output_file);
-
-            func = func->right;
-        }
-
-        if (strcmp(func_name, main_func_name) == 0)
-        {
-            ASM_PRINT("\n\nhlt\n");
-        }
-        else
-        {
-            ASM_PRINT("\nret\n");
-        }
-    }
-
-    if (next_func != nullptr)
-    {
-        AsmFuncs(next_func, l_elems, output_file);
+        decl_node = decl_node->right;
     }
 
     return kTreeSuccess;
@@ -117,180 +105,399 @@ static TreeErrs_t AsmFuncs(TreeNode      *cur_func,
 
 //==============================================================================
 
-static TreeErrs_t AssembleOp(const TreeNode  *node,
-                             const Variables *vars,
-                             FILE            *output_file)
+static TreeErrs_t AssembleFuncDef(const TreeNode      *node,
+                                  const LanguageElems *l_elems,
+                                  TableOfNames        *cur_table,
+                                  FILE                *output_file)
+{
+    TreeNode *func = (TreeNode *) node;
+
+    TreeNode *params = func->right;
+
+    ASM_PRINT("%s:\n", l_elems->vars.var_array[func->data.variable_pos].id);
+
+    TableOfNames *func_table = nullptr;
+
+    for (size_t i = 0; i < l_elems->tables.tables_count; i++)
+    {
+        if (l_elems->tables.name_tables[i]->func_code == func->data.variable_pos)
+        {
+            func_table = l_elems->tables.name_tables[i];
+
+            break;
+        }
+    }
+
+    if (func_table == nullptr)
+    {
+        printf(">>AsmFuncs() failed to find table\n");
+
+        return kFailedToFind;
+    }
+
+    TreeNode *cur_instruction = params->right;
+
+    while (cur_instruction != nullptr)
+    {
+        AssembleOp(cur_instruction->left, l_elems, func_table, output_file);
+
+        cur_instruction = cur_instruction->right;
+    }
+
+    if (func->data.variable_pos == l_elems->tables.main_id_pos)
+    {
+        ASM_PRINT("hlt\n");
+    }
+    else
+    {
+        ASM_PRINT("ret\n");
+    }
+
+    return kTreeSuccess;
+}
+
+//==============================================================================
+
+static TreeErrs_t AssembleOp(const TreeNode      *node,
+                             const LanguageElems *l_elems,
+                             TableOfNames        *cur_table,
+                             FILE                *output_file)
 {
     if (node == nullptr)
     {
         return kNullTree;
     }
-    else if (node->type == kConstNumber)
-    {
-        ASM_PRINT("push %lg\n", node->data.const_val);
 
-        return kTreeSuccess;
-    }
-    else if (node->type == kIdentificator)
+    switch (node->type)
     {
-        ASM_PRINT("push [%d]\n", node->data.variable_pos);
-
-        return kTreeSuccess;
-    }
-    else if (node->type == kVarDecl)
-    {
-        if (node->right->type               == kOperator &&
-            node->right->data.key_word_code == kAssign)
+        case kConstNumber:
         {
-            ASM_NODE(node->right);
+            ASM_PRINT("\tpush %lg\n", node->data.const_val);
+
+            break;
         }
 
-        return kTreeSuccess;
-    }
-    else if (node->type == kCall)
-    {
-        ASM_PRINT("call %s\n"
-                  "push rax\n",
-                  vars->var_array[node->right->data.variable_pos].id);
-
-        return kTreeSuccess;
-    }
-
-    if (node->type == kOperator)
-    {
-        switch (node->data.key_word_code)
+        case kIdentificator:
         {
-            case kAdd:
+            size_t var_pos = GetVarPos(cur_table, node->data.variable_pos) + 1;
+
+            ASM_PRINT(";PUSH VAR '%s'\n",
+                      l_elems->vars.var_array[node->data.variable_pos].id);
+
+            ASM_PRINT("\tpush [rbx+%d]\n", var_pos);
+
+            break;
+        }
+
+        case kFuncDef:
+        {
+            AssembleFuncDef(node, l_elems, cur_table, output_file);
+
+            break;
+        }
+
+        case kVarDecl:
+        {
+            if (node->right != nullptr)
             {
-                ASM_NODE(node->left);
-                ASM_NODE(node->right);
+                ASM_PRINT("\t\t;VAR '%s' DECLARATION\n ",
+                          l_elems->vars.var_array[node->data.variable_pos].id);
 
-                ASM_PRINT("add\n\n");
-
-                break;
-            }
-
-            case kIf:
-            {
-                ASM_PRINT("\n");
-
-                ASM_NODE(node->left);
-
-                if (node->left->data.key_word_code == kEqual)
+                if (node->right->type == kOperator && node->right->data.key_word_code == kAssign)
                 {
-                    ASM_NODE(node->left->left);
-                    ASM_NODE(node->left->right);
-
-                    ASM_PRINT("jne end%d\n", condition_count);
+                    ASM_NODE(node->right);
                 }
-                else
-                {
-                    ASM_PRINT("push 0\n"
-                              "jbe end%d\n", condition_count);
-                }
-
-                TreeNode *cur_line = node->right;
-
-                while (cur_line != nullptr)
-                {
-                    AssembleOp(cur_line->left, vars, output_file);
-
-                    cur_line = cur_line->right;
-                }
-
-                ASM_PRINT("end%d:\n", condition_count++);
-
-                ++condition_count;
-
-                return kTreeSuccess;
-
-                break;
             }
 
-            case kScan:
-            {
-                ASM_PRINT("in\n");
+            break;
+        }
 
-                break;
-            }
+        case kCall:
+        {
+            ASM_PRINT(";FUNC CALL\n");
 
-            case kPrint:
-            {
-                ASM_NODE(node->right);
+            size_t var_count = cur_table->name_count + 1;
 
-                ASM_PRINT("out\n");
+            AsmParams(node->left, l_elems, cur_table, output_file);
 
-                break;
-            }
-            case kSub:
-            {
-                ASM_NODE(node->left);
-                ASM_NODE(node->right);
+            ASM_PRINT("\tpush rbx\n"
+                      "\tpush rbx\n"
+                      "\tpush %d\n"
+                      "\tadd\n"
+                      "\tpop rbx\n", var_count);
 
-                ASM_PRINT("sub\n\n");
+            ASM_PRINT("\tcall %s\n"
+                      "\tpop rbx\n"
+                      "\tpush [rbx+%d]\t\t\t;ret_value\n",
+                      l_elems->vars.var_array[node->right->data.variable_pos].id,
+                      var_count);
 
-                break;
-            }
+            return kTreeSuccess;
+        }
 
-            case kAssign:
-            {
-                ASM_NODE(node->left);
+        case kOperator:
+        {
+            AsmOperator(node, l_elems, cur_table, output_file);
 
-                ASM_PRINT("pop [%d]\n", node->right->data.variable_pos);
+            break;
+        }
 
-                break;
-            }
+        default:
+        {
+            printf("AssembleOp() unknown type\n");
 
-            case kMult:
-            {
-                ASM_NODE(node->left);
-                ASM_NODE(node->right);
-
-                ASM_PRINT("mult\n\n");
-
-                break;
-            }
-
-            case kSqrt:
-            {
-                ASM_NODE(node->right);
-
-                ASM_PRINT("sqrt\n\n");
-
-                break;
-            }
-
-            case kDiv:
-            {
-                ASM_NODE(node->left);
-                ASM_NODE(node->right);
-
-                ASM_PRINT("\ndiv\n");
-
-                break;
-            }
-
-            case kReturn:
-            {
-                ASM_NODE(node->right);
-
-                ASM_PRINT("pop rax\n");
-
-                break;
-            }
-
-            default:
-            {
-                printf("AssembleOp() KAVO OP_CODE : %d\n", node->data.key_word_code);
-
-                /*whaaaa? ÍÓ„Ó Ú˚ ·ÎˇÚ¸ Ë˘Â¯¸?
-                 +------------------*/
-                return kFailedToFind;
-
-                break;
-            }
+            return kUnknownType;
         }
     }
 
     return kTreeSuccess;
 }
+
+//==============================================================================
+
+static TreeErrs_t AsmParams(const TreeNode      *node,
+                            const LanguageElems *l_elems,
+                            TableOfNames        *cur_table,
+                            FILE                *output_file)
+{
+    TreeNode *cur_param = (TreeNode *)node;
+
+    size_t var_count = cur_table->name_count + 1;
+
+
+    for (size_t i = 0; cur_param != nullptr; i++)
+    {
+        ASM_NODE(cur_param->left);
+
+        ASM_PRINT("\tpop [rbx+%d]\n", var_count + i + 1);
+
+        cur_param = cur_param->right;
+    }
+
+    return kTreeSuccess;
+}
+
+//==============================================================================
+
+static TreeErrs_t AsmOperator(const TreeNode      *node,
+                              const LanguageElems *l_elems,
+                              TableOfNames        *cur_table,
+                              FILE                *output_file)
+{
+    switch (node->data.key_word_code)
+    {
+        case kAdd:
+        {
+            ASM_PRINT(";ADD\n");
+            ASM_NODE(node->left);
+            ASM_NODE(node->right);
+
+            ASM_PRINT("\tadd\n\n");
+
+            break;
+        }
+
+        case kIf:
+        {
+            ASM_PRINT(";IF\n");
+
+            ASM_PRINT("\tpush 0\n");
+            ASM_NODE(node->left);
+
+            ASM_PRINT("\tjbe end_if_%d\n", if_count);
+
+
+            TreeNode *cur_op = node->right;
+
+            while (cur_op != nullptr)
+            {
+                AssembleOp(cur_op->left, l_elems, cur_table, output_file);
+
+                cur_op = cur_op->right;
+            }
+
+            ASM_PRINT("end_if_%d:\n", if_count++);
+
+            ++if_count;
+
+            return kTreeSuccess;
+
+            break;
+        }
+
+        case kWhile:
+        {
+            ASM_PRINT("cycle_start_%d:\n"
+                      "\tpush 0\n", cycle_op_count);
+
+            ASM_NODE(node->left);
+
+            size_t cur_cycle_op_count = cycle_op_count++;
+
+            ASM_PRINT("\tjbe while_end_%d\n", cycle_op_count);
+
+            TreeNode *cur_op = node->right;
+
+            while (cur_op != nullptr)
+            {
+                AssembleOp(cur_op->left, l_elems, cur_table, output_file);
+
+                cur_op = cur_op->right;
+            }
+
+            ASM_PRINT("\tjmp cycle_start_%d\n"
+                      "cycle_end_%d:\n", cur_cycle_op_count, cur_cycle_op_count);
+
+            break;
+        }
+
+        case kBreak:
+        {
+            ASM_PRINT("jmp cycle_end_%d\n", cycle_op_count);
+
+            break;
+        }
+
+        case kContinue:
+        {
+            ASM_PRINT("jmp cycle_start_%d\n", cycle_op_count);
+
+            break;
+        }
+
+        case kScan:
+        {
+            ASM_PRINT("\tin\n");
+
+            break;
+        }
+
+        #define ASM_CMD(const, static_var_name, jmp_str, label_str, ...)            \
+            case const:                                                             \
+            {                                                                       \
+                static size_t static_var_name = 0;                                  \
+                                                                                    \
+                ASM_PRINT("\tpush 0\n");                                            \
+                                                                                    \
+                ASM_NODE(node->left);                                               \
+                ASM_NODE(node->right);                                              \
+                ASM_PRINT("\tsub\n"                                                 \
+                          "\t%s %s_%d\n"                                            \
+                          "\tpush 0\n"                                              \
+                          "\tjmp logical_op_end_%d\n"                               \
+                          "%s_%d:\n"                                                \
+                          "\tpush 1\n"                                              \
+                          "logical_op_end_%d:\n", jmp_str, label_str,               \
+                                                    static_var_name,                \
+                                                    logical_op_count,               \
+                                                    label_str, static_var_name,     \
+                                                    logical_op_count);              \
+                ++logical_op_count;                                                 \
+                ++static_var_name;                                                  \
+                                                                                    \
+                break;                                                              \
+            }
+
+        #include "logical_op.gen.h"
+
+        #undef ASM_CMD
+
+        case kPrint:
+        {
+            ASM_PRINT(";PRINT\n");
+            ASM_NODE(node->right);
+
+            ASM_PRINT("\tout\n");
+
+            break;
+        }
+        case kSub:
+        {
+            ASM_PRINT(";SUB\n");
+            ASM_NODE(node->left);
+            ASM_NODE(node->right);
+
+            ASM_PRINT("\tsub\n");
+
+            break;
+        }
+
+        case kAssign:
+        {
+            ASM_PRINT(";ASSIGN\n");
+            ASM_NODE(node->left);
+
+            size_t var_pos = GetVarPos(cur_table, node->right->data.variable_pos) + 1;
+
+            ASM_PRINT("\tpop [rbx+%d]\n", var_pos);
+
+            break;
+        }
+
+        case kMult:
+        {
+            ASM_PRINT(";MULT\n");
+            ASM_NODE(node->left);
+            ASM_NODE(node->right);
+
+            ASM_PRINT("\tmult\n");
+
+            break;
+        }
+
+        case kSqrt:
+        {
+            ASM_PRINT(";SQRT\n");
+            ASM_NODE(node->right);
+
+            ASM_PRINT("\tsqrt\n");
+
+            break;
+        }
+
+        case kDiv:
+        {
+            ASM_PRINT(";DIV\n");
+            ASM_NODE(node->left);
+            ASM_NODE(node->right);
+
+            ASM_PRINT("\tdiv\n");
+
+            break;
+        }
+
+        case kReturn:
+        {
+            ASM_PRINT(";RETURN\n");
+            ASM_NODE(node->right);
+
+            ASM_PRINT("\tpop [rbx]\n"
+                      "ret\n");
+
+            break;
+        }
+
+        case kAbort:
+        {
+            ASM_PRINT(";ABORT\n");
+            ASM_PRINT("\thlt\n\n");
+
+            break;
+        }
+
+        default:
+        {
+            printf("AssembleOperator() KAVO TYPE : %d, OP_CODE : %d\n, node_pointer: %p", node->type,
+                                                                                          node->data.key_word_code,
+                                                                                          node);
+
+            return kUnknownKeyCode;
+
+            break;
+        }
+    }
+
+    return kTreeSuccess;
+}
+
+//==============================================================================

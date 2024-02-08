@@ -13,29 +13,208 @@ static const char *kTreeSaveFileName = "tree_save.txt";
 
 static const int kPoisonVal = 0xBADBABA;
 
-static TreeNode* CreateNodeFromText(Variables     *vars,
+static FILE *dump_file = nullptr;
+
+static const char *dmp_name = "suka_dump.txt";
+
+static TreeNode* CreateNodeFromText(Identificators     *vars,
                                     Text          *text,
                                     size_t        *iterator);
 
-static TreeNode *CreateNodeFromBrackets(Variables     *vars,
+static TreeNode *CreateNodeFromBrackets(Identificators     *vars,
                                         Text          *text,
                                         size_t        *iterator);
 
 static TreeErrs_t PrintTree(const TreeNode *root,
-                            Variables      *vars,
+                            Identificators *vars,
                             FILE           *output_file);
 
-static TreeErrs_t ReallocVarArray(Variables *vars,
-                                  size_t     new_size);
+static TreeErrs_t ReallocVarArray(Identificators *vars,
+                                  size_t          new_size);
 
+static int ReadNameTablesOutOfFile(LanguageElems *l_elems,
+                                   const char    *tables_file_name);
+
+static int ReallocNameTables(NameTables *tables, size_t new_size);
+
+static int ReallocTableOfNames(TableOfNames *table, size_t new_size);
 
 static const size_t kBaseVarCount = 16;
 
+static const size_t kBaseTablesCount = 4;
+
+static const size_t kBaseNamesCount  = 8;
+
 //==============================================================================
 
-int VarArrayInit(Variables *vars)
+int InitNamesLog()
 {
-    vars->var_array = (Variable *) calloc(kBaseVarCount, sizeof(Variable));
+    dump_file = fopen(dmp_name, "w");
+
+    return 0;
+}
+
+//==============================================================================
+
+int CloseNamesLog()
+{
+    fclose(dump_file);
+
+    dump_file = nullptr;
+
+    return 0;
+}
+
+//==============================================================================
+
+int DumpNameTables(NameTables *tables,
+                   const char *func,
+                   int         line)
+{
+    #define DMP_PRINT(...) fprintf(dump_file, __VA_ARGS__)
+    DMP_PRINT("FUNC: %s, LINE: %d\n", func, line);
+    DMP_PRINT("TABLE_COUNT : %d, TABLES_CAP %d\n", tables->tables_count,
+                                                   tables->capacity);
+
+    for (size_t i = 0; i < tables->tables_count; i++)
+    {
+        DMP_PRINT("\tTABLE[%d, POINTER %p] name_count - %d, capacity %d\n", i, tables->name_tables[i],
+                                                                               tables->name_tables[i]->name_count,
+                                                                               tables->name_tables[i]->capacity);
+
+        DMP_PRINT("\t{\n");
+        for (size_t j = 0; j < tables->name_tables[i]->capacity; j++)
+        {
+            DMP_PRINT("\t\t%d %d\n", tables->name_tables[i]->names[j].pos,
+                                     tables->name_tables[i]->names[j].type);
+        }
+        DMP_PRINT("\t}\n\n");
+    }
+    DMP_PRINT("+--------------------------------------------------------+\n");
+
+    return 0;
+}
+
+//==============================================================================
+
+int NameTablesInit(NameTables *tables)
+{
+    tables->capacity     = kBaseTablesCount;
+    tables->tables_count = 0;
+    tables->name_tables  = (TableOfNames **) calloc(tables->capacity, sizeof(TableOfNames));
+
+    return 0;
+}
+
+//==============================================================================
+
+static int ReallocNameTables(NameTables *tables, size_t new_size)
+{
+    size_t old_size = tables->tables_count;
+
+    tables->capacity = new_size;
+
+    tables->name_tables = (TableOfNames **) realloc(tables->name_tables, tables->capacity * sizeof(TableOfNames));
+
+    for (size_t i = old_size; i < tables->capacity; i++)
+    {
+        tables->name_tables[i] = nullptr;
+    }
+
+    return 0;
+}
+
+//==============================================================================
+
+TableOfNames *AddTableOfNames(NameTables *tables,
+                              int         func_code)
+{
+    if (tables->tables_count >= tables->capacity)
+    {
+        ReallocNameTables(tables, tables->capacity * 2);
+    }
+
+    tables->name_tables[tables->tables_count] = (TableOfNames *) calloc(1, sizeof(TableOfNames));
+
+    tables->name_tables[tables->tables_count]->pos = tables->tables_count;
+
+    TablesOfNamesInit(tables->name_tables[tables->tables_count], func_code);
+
+    tables->tables_count++;
+
+    return tables->name_tables[tables->tables_count - 1];
+}
+
+//==============================================================================
+
+static int ReallocTableOfNames(TableOfNames *table, size_t new_size)
+{
+    size_t old_size = table->name_count;
+
+    table->capacity = new_size;
+
+    table->names = (Name *) realloc(table->names, table->capacity * sizeof(Name));
+
+    if (table->names == nullptr)
+    {
+        perror("ReallocTableOfNames() САНЯ ТЫ ДАУН!!\n");
+
+        return -1;
+    }
+
+    for (size_t i = old_size; i < table->capacity; i++)
+    {
+        table->names[i].pos  = 228;
+        table->names[i].type = kUndefined;
+    }
+
+    return 0;
+}
+
+//==============================================================================
+
+int TablesOfNamesInit(TableOfNames *table,
+                      int           func_code)
+{
+    table->name_count = 0;
+    table->func_code  = func_code;
+    table->capacity   = kBaseNamesCount;
+
+    table->names = (Name *) calloc(table->capacity, sizeof(Name));
+
+    for (size_t i = 0; i < table->capacity; i++)
+    {
+        table->names[i].pos  = 228;
+        table->names[i].type = kUndefined;
+    }
+
+    return 0;
+}
+
+//==============================================================================
+
+int AddName(TableOfNames *table,
+            size_t        id,
+            IdType_t      type)
+{
+    if (table->name_count >= table->capacity)
+    {
+        ReallocTableOfNames(table, table->capacity * 2);
+    }
+
+    table->names[table->name_count].pos  = id;
+    table->names[table->name_count].type = type;
+
+    table->name_count++;
+
+    return 0;
+}
+
+//==============================================================================
+
+int VarArrayInit(Identificators *vars)
+{
+    vars->var_array = (Identificator *) calloc(kBaseVarCount, sizeof(Identificator));
 
     if (vars->var_array == nullptr)
     {
@@ -51,7 +230,7 @@ int VarArrayInit(Variables *vars)
 
 //==============================================================================
 
-int SeekVariable(Variables *vars, const char *var_name)
+int SeekVariable(Identificators *vars, const char *var_name)
 {
     for (size_t i = 0; i < vars->var_count; i++)
     {
@@ -66,7 +245,7 @@ int SeekVariable(Variables *vars, const char *var_name)
 
 //==============================================================================
 
-int AddVar(Variables *vars, const char *var_name)
+int AddVar(Identificators *vars, const char *var_name)
 {
     if (vars->var_count >= vars->size)
     {
@@ -83,13 +262,10 @@ int AddVar(Variables *vars, const char *var_name)
 
 //==============================================================================
 
-int VarArrayDtor(Variables *vars)
+int VarArrayDtor(Identificators *vars)
 {
-    printf("%p", vars->var_array);
-
     free(vars->var_array);
 
-    printf("HUY");
     vars->var_array = nullptr;
 
     vars->size = vars->var_count = 0;
@@ -99,15 +275,15 @@ int VarArrayDtor(Variables *vars)
 
 //==============================================================================
 
-static TreeErrs_t ReallocVarArray(Variables *vars,
+static TreeErrs_t ReallocVarArray(Identificators *vars,
                                   size_t     new_size)
 {
     vars->size = new_size;
-    vars->var_array = (Variable *) realloc(vars->var_array, vars->size * sizeof(Variable));
+    vars->var_array = (Identificator *) realloc(vars->var_array, vars->size * sizeof(Identificator));
 
     if (vars->var_array == nullptr)
     {
-        perror("ReallocVarArray() failed to realloc variable array");
+        perror("ReallocVarArray() failed to realloc Identificator array");
 
         return kFailedRealloc;
     }
@@ -237,7 +413,7 @@ TreeNode *NodeCtor(TreeNode         *parent_node,
 //==============================================================================
 
 static TreeErrs_t PrintTree(const TreeNode *root,
-                            Variables      *vars,
+                            Identificators      *vars,
                             FILE           *output_file)
 {
     CHECK(output_file);
@@ -274,18 +450,18 @@ static TreeErrs_t PrintTree(const TreeNode *root,
         case kIdentificator:
         {
             fprintf(output_file,
-                    "%d %s ",
+                    "%d %d ",
                     kIdentificator,
-                    vars->var_array[root->data.variable_pos].id);
+                    root->data.variable_pos);
 
             break;
         }
         case kFuncDef:
         {
             fprintf(output_file,
-                    "%d %s ",
+                    "%d %d ",
                     kFuncDef,
-                    vars->var_array[root->data.variable_pos].id);
+                    root->data.variable_pos);
 
             break;
         }
@@ -300,9 +476,9 @@ static TreeErrs_t PrintTree(const TreeNode *root,
         case kVarDecl:
         {
             fprintf(output_file,
-                    "%d %s ",
+                    "%d %d ",
                     kVarDecl,
-                    vars->var_array[root->data.variable_pos].id);
+                    root->data.variable_pos);
 
             break;
         }
@@ -348,9 +524,8 @@ static TreeErrs_t PrintTree(const TreeNode *root,
 
 //==============================================================================
 
-TreeErrs_t PrintTreeInFile(Tree       *tree,
-                           Variables  *vars,
-                           const char *file_name)
+TreeErrs_t PrintTreeInFile(LanguageElems *l_elems,
+                           const char    *file_name)
 {
     FILE *output_file = fopen(file_name, "wb");
 
@@ -359,7 +534,31 @@ TreeErrs_t PrintTreeInFile(Tree       *tree,
         return kFailedToOpenFile;
     }
 
-    PrintTree(tree->root, vars, output_file);
+    int main_id = kPoisonVal;
+
+    for (size_t i = 0; i < l_elems->vars.var_count; i++)
+    {
+        if (strcmp(l_elems->vars.var_array[i].id, kMainFuncName) == 0)
+        {
+            main_id = i;
+
+            break;
+        }
+    }
+
+    if (main_id == kPoisonVal)
+    {
+        printf("У любого уважающего себя кери в программе должен быть 'аганим'.\n"
+               "У тебя его нет, бездарь...");
+
+        fclose(output_file);
+
+        return kMissingMain;
+    }
+
+    fprintf(output_file, "%d ", main_id);
+
+    PrintTree(l_elems->syntax_tree.root, &l_elems->vars, output_file);
 
     fclose(output_file);
 
@@ -369,13 +568,16 @@ TreeErrs_t PrintTreeInFile(Tree       *tree,
 //==============================================================================
 
 TreeErrs_t ReadLanguageElemsOutOfFile(LanguageElems *l_elems,
-                                      const char    *file_name)
+                                      const char    *tree_file_name,
+                                      const char    *tables_file_name)
 {
     CHECK(l_elems);
+    CHECK(tree_file_name);
+    CHECK(tables_file_name);
 
     Text tree_text = {0};
 
-    if (ReadWordsFromFile(&tree_text, file_name) != kSuccess)
+    if (ReadWordsFromFile(&tree_text, tree_file_name) != kSuccess)
     {
         printf("\nReadTreeOutOfFile() failed to read text from file\n");
 
@@ -386,6 +588,8 @@ TreeErrs_t ReadLanguageElemsOutOfFile(LanguageElems *l_elems,
 
     size_t iterator = 0;
 
+    l_elems->tables.main_id_pos = atoi(tree_text.lines_ptr[iterator++].str);
+
     l_elems->syntax_tree.root = CreateNodeFromText(&l_elems->vars, &tree_text, &iterator);
 
     if (l_elems->syntax_tree.root == nullptr)
@@ -395,6 +599,8 @@ TreeErrs_t ReadLanguageElemsOutOfFile(LanguageElems *l_elems,
         return kFailedToReadTree;
     }
 
+    ReadNameTablesOutOfFile(l_elems, tables_file_name);
+
     GRAPH_DUMP_TREE(&l_elems->syntax_tree);
 
     return kTreeSuccess;
@@ -402,66 +608,135 @@ TreeErrs_t ReadLanguageElemsOutOfFile(LanguageElems *l_elems,
 
 //==============================================================================
 
-static TreeNode* CreateNodeFromText(Variables     *vars,
-                                    Text          *text,
-                                    size_t        *iterator)
+#define CUR_TOKEN table_tokens.lines_ptr[i].str
+
+#define GO_TO_NEXT_TOKEN i++
+
+//==============================================================================
+
+static int ReadNameTablesOutOfFile(LanguageElems *l_elems,
+                                   const char    *tables_file_name)
+{
+    CHECK(l_elems);
+    CHECK(tables_file_name);
+
+    Text table_tokens;
+
+    ReadWordsFromFile(&table_tokens, tables_file_name);
+
+    size_t i = 0;
+
+    l_elems->vars.var_count = atoi(CUR_TOKEN);
+
+    l_elems->vars.var_array = (Identificator *) calloc(l_elems->vars.var_count,
+                                                       sizeof(Identificator));
+    GO_TO_NEXT_TOKEN;
+
+    for (size_t j = 0; j < l_elems->vars.var_count; j++)
+    {
+        l_elems->vars.var_array[j].id = strdup(CUR_TOKEN);
+
+        GO_TO_NEXT_TOKEN;
+    }
+
+    l_elems->tables.tables_count = atoi(CUR_TOKEN);
+    l_elems->tables.name_tables  = (TableOfNames **) calloc(l_elems->tables.tables_count,
+                                                            sizeof(TableOfNames *));
+
+    GO_TO_NEXT_TOKEN;
+
+    for (size_t j = 0; j < l_elems->tables.tables_count; j++)
+    {
+        l_elems->tables.name_tables[j] = (TableOfNames *) calloc(1, sizeof(TableOfNames));
+
+        l_elems->tables.name_tables[j]->name_count = atoi(CUR_TOKEN);
+
+        l_elems->tables.name_tables[j]->capacity   = atoi(CUR_TOKEN);
+
+        l_elems->tables.name_tables[j]->names = (Name *) calloc(l_elems->tables.name_tables[j]->capacity,
+                                                                 sizeof(Name));
+
+        GO_TO_NEXT_TOKEN;
+
+        l_elems->tables.name_tables[j]->func_code = atoi(CUR_TOKEN);
+
+        GO_TO_NEXT_TOKEN;
+
+        for (size_t z = 0; z < l_elems->tables.name_tables[j]->capacity; z++)
+        {
+
+            l_elems->tables.name_tables[j]->names[z].pos = atoi(CUR_TOKEN);
+
+            GO_TO_NEXT_TOKEN;
+
+            l_elems->tables.name_tables[j]->names[z].type = (IdType_t) atoi(CUR_TOKEN);
+
+            GO_TO_NEXT_TOKEN;
+        }
+    }
+
+    return 0;
+}
+
+//==============================================================================
+
+#undef CUR_TOKEN
+
+#undef GO_TO_NEXT_TOKEN
+
+//==============================================================================
+
+#define CUR_TOKEN text->lines_ptr[*iterator].str
+
+#define GO_TO_NEXT_TOKEN ++(*iterator)
+
+//==============================================================================
+
+static TreeNode* CreateNodeFromText(Identificators *vars,
+                                    Text           *text,
+                                    size_t         *iterator)
 {
     CHECK(iterator);
     CHECK(text);
     TreeNode *node = nullptr;
 
-
-    if (*text->lines_ptr[*iterator].str == '(')
+    if (*CUR_TOKEN == '(')
     {
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
-
-        ++(*iterator);
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
+        GO_TO_NEXT_TOKEN;
 
         ExpressionType_t type = (ExpressionType_t) atoi(text->lines_ptr[*iterator].str);
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
-
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
 
         switch (type)
         {
             case kConstNumber:
             {
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
-        ++(*iterator);
+                GO_TO_NEXT_TOKEN;
 
                 node = NodeCtor(nullptr,
                                 nullptr,
                                 nullptr,
                                 kConstNumber,
-                                strtod(text->lines_ptr[*iterator].str, nullptr));
+                                strtod(CUR_TOKEN, nullptr));
                 break;
             }
 
             case kOperator:
             {
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
-        ++(*iterator);
+                GO_TO_NEXT_TOKEN;
 
                 node = NodeCtor(nullptr,
                                 nullptr,
                                 nullptr,
                                 kOperator,
-                                atoi(text->lines_ptr[*iterator].str));
+                                atoi(CUR_TOKEN));
                 break;
             }
 
             case kIdentificator:
             {
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
-        ++(*iterator);
+                GO_TO_NEXT_TOKEN;
 
-                int pos = SeekVariable(vars, text->lines_ptr[*iterator].str);
-
-                if (pos < 0)
-                {
-                    pos = AddVar(vars, text->lines_ptr[*iterator].str);
-                }
+                int pos = atoi(CUR_TOKEN);
 
                 node = NodeCtor(nullptr,
                                 nullptr,
@@ -473,15 +748,9 @@ static TreeNode* CreateNodeFromText(Variables     *vars,
             }
             case kFuncDef:
             {
-        ++(*iterator);
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
+                GO_TO_NEXT_TOKEN;
 
-                int pos = SeekVariable(vars, text->lines_ptr[*iterator].str);
-
-                if (pos < 0)
-                {
-                    pos = AddVar(vars, text->lines_ptr[*iterator].str);
-                }
+                int pos = atoi(CUR_TOKEN);
 
                 node = NodeCtor(nullptr,
                                 nullptr,
@@ -494,8 +763,6 @@ static TreeNode* CreateNodeFromText(Variables     *vars,
 
             case kParamsNode:
             {
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
-
                 node = NodeCtor(nullptr,
                                 nullptr,
                                 nullptr,
@@ -506,15 +773,9 @@ static TreeNode* CreateNodeFromText(Variables     *vars,
 
             case kVarDecl:
             {
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
-        ++(*iterator);
+                GO_TO_NEXT_TOKEN;
 
-                int pos = SeekVariable(vars, text->lines_ptr[*iterator].str);
-
-                if (pos < 0)
-                {
-                    pos = AddVar(vars, text->lines_ptr[*iterator].str);
-                }
+                int pos = atoi(CUR_TOKEN);
 
                 node = NodeCtor(nullptr,
                                 nullptr,
@@ -527,8 +788,6 @@ static TreeNode* CreateNodeFromText(Variables     *vars,
 
             case kCall:
             {
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
-
                 node = NodeCtor(nullptr,
                                 nullptr,
                                 nullptr,
@@ -539,26 +798,20 @@ static TreeNode* CreateNodeFromText(Variables     *vars,
             }
             default:
             {
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
-
                 printf("CreateNodeFromText() -> KAVO? 1000-7 ???");
 
                 break;
             }
         }
     }
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
 
-    ++(*iterator);
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
+    GO_TO_NEXT_TOKEN;
 
     node->left =  CreateNodeFromBrackets(vars, text, iterator);
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
 
     node->right = CreateNodeFromBrackets(vars, text, iterator);
-        printf("LINE: %d\n\t\tPOS %d string[%s]\n",__LINE__, *iterator, text->lines_ptr[*iterator].str);
 
-    if (*text->lines_ptr[*iterator].str != ')')
+    if (*CUR_TOKEN != ')')
     {
         TreeDtor(node);
 
@@ -570,28 +823,28 @@ static TreeNode* CreateNodeFromText(Variables     *vars,
 
 //==============================================================================
 
-static TreeNode *CreateNodeFromBrackets(Variables     *vars,
-                                        Text          *text,
-                                        size_t        *iterator)
+static TreeNode *CreateNodeFromBrackets(Identificators *vars,
+                                        Text           *text,
+                                        size_t         *iterator)
 {
     TreeNode *node = nullptr;
 
-    if (*text->lines_ptr[*iterator].str == '(')
+    if (*CUR_TOKEN == '(')
     {
         node = CreateNodeFromText(vars, text, iterator);
 
-        ++(*iterator);
+        GO_TO_NEXT_TOKEN;
 
         if (node == nullptr)
         {
             return nullptr;
         }
     }
-    else if (*text->lines_ptr[*iterator].str != ')')
+    else if (*CUR_TOKEN != ')')
     {
-        if (strcmp(text->lines_ptr[*iterator].str, "_") == 0)
+        if (*CUR_TOKEN == '_')
         {
-            ++(*iterator);
+            GO_TO_NEXT_TOKEN;
 
             return nullptr;
         }
@@ -601,8 +854,13 @@ static TreeNode *CreateNodeFromBrackets(Variables     *vars,
 }
 //==============================================================================
 
+#undef CUR_TOKEN
+#undef GO_TO_NEXT_TOKEN
+
+//==============================================================================
+
 TreeNode *CopyNode(const TreeNode *src_node,
-                   TreeNode       *parent_node)
+                         TreeNode *parent_node)
 {
     if (src_node == nullptr)
     {
@@ -649,17 +907,13 @@ TreeErrs_t SetParents(TreeNode *parent_node)
 
 //==============================================================================
 
-TreeErrs_t GetDepth(const TreeNode *node, int *depth)
-{
-
-}
-
-//==============================================================================
-
 TreeErrs_t LanguageElemsInit(LanguageElems *l_elems)
 {
     TreeCtor(&l_elems->syntax_tree);
+
     VarArrayInit(&l_elems->vars);
+
+    NameTablesInit(&l_elems->tables);
 
     return kTreeSuccess;
 }
