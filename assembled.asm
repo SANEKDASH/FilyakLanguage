@@ -1,19 +1,21 @@
-jmp Р°РіР°РЅРёРј
+call аганим
+hlt
 аганим:
-		;VAR 'коэф_а' DECLARATION
- ;ASSIGN
+;VAR 'коэф_а' DECLARATION
+;ASSIGN
 	in
 	pop [rbx+1]
-		;VAR 'коэф_б' DECLARATION
- ;ASSIGN
+;VAR 'коэф_б' DECLARATION
+;ASSIGN
 	in
 	pop [rbx+2]
-		;VAR 'коэф_ц' DECLARATION
- ;ASSIGN
+;VAR 'коэф_ц' DECLARATION
+;ASSIGN
 	in
 	pop [rbx+3]
 ;IF
 	push 0
+;LOGICAL_OP ==
 	push 0
 ;PUSH VAR 'коэф_а'
 	push [rbx+1]
@@ -45,15 +47,6 @@ logical_op_end_0:
 	hlt
 
 end_if_0:
-cycle_start_0:
-	push 0
-	push 1
-	jbe while_end_1
-;PRINT
-	push 228
-	out
-	jmp cycle_start_0
-cycle_end_0:
 ;FUNC CALL
 ;PUSH VAR 'коэф_а'
 	push [rbx+1]
@@ -72,7 +65,7 @@ cycle_end_0:
 	call решить_квадратный_случай
 	pop rbx
 	push [rbx+4]			;ret_value
-hlt
+ret
 дискриминант_считай:
 ;RETURN
 ;SUB
@@ -98,6 +91,7 @@ ret
 решить_линейный_случай:
 ;IF
 	push 0
+;LOGICAL_OP ==
 	push 0
 ;PUSH VAR 'коэф_б'
 	push [rbx+1]
@@ -109,7 +103,30 @@ ret
 equal_op_end_1:
 	push 1
 logical_op_end_1:
+	jbe end_if_1
+;IF
+	push 0
+;LOGICAL_OP ==
+	push 0
+;PUSH VAR 'коэф_ц'
+	push [rbx+2]
+	push 0
+	sub
+	je equal_op_end_2
+	push 0
+	jmp logical_op_end_2
+equal_op_end_2:
+	push 1
+logical_op_end_2:
 	jbe end_if_2
+;PRINT
+	push -1
+	out
+;RETURN
+	push -1
+	pop [rbx]
+ret
+end_if_2:
 ;PRINT
 	push 0
 	out
@@ -117,9 +134,9 @@ logical_op_end_1:
 	push 0
 	pop [rbx]
 ret
-end_if_2:
-		;VAR 'корень' DECLARATION
- ;ASSIGN
+end_if_1:
+;VAR 'корень' DECLARATION
+;ASSIGN
 ;DIV
 ;MULT
 	push -1
@@ -143,8 +160,8 @@ end_if_2:
 ret
 ret
 решить_квадратный_случай:
-		;VAR 'дискриминант' DECLARATION
- ;ASSIGN
+;VAR 'дискриминант' DECLARATION
+;ASSIGN
 ;FUNC CALL
 ;PUSH VAR 'коэф_а'
 	push [rbx+1]
@@ -166,6 +183,7 @@ ret
 	pop [rbx+4]
 ;IF
 	push 0
+;LOGICAL_OP <
 	push 0
 ;PUSH VAR 'дискриминант'
 	push [rbx+4]
@@ -173,11 +191,11 @@ ret
 	sub
 	jb less_op_end_0
 	push 0
-	jmp logical_op_end_2
+	jmp logical_op_end_3
 less_op_end_0:
 	push 1
-logical_op_end_2:
-	jbe end_if_4
+logical_op_end_3:
+	jbe end_if_3
 ;PRINT
 	push 0
 	out
@@ -185,9 +203,9 @@ logical_op_end_2:
 	push 0
 	pop [rbx]
 ret
-end_if_4:
-		;VAR 'корень_1' DECLARATION
- ;ASSIGN
+end_if_3:
+;VAR 'корень_1' DECLARATION
+;ASSIGN
 ;DIV
 ;SUB
 ;MULT
@@ -207,8 +225,8 @@ end_if_4:
 	mult
 	div
 	pop [rbx+5]
-		;VAR 'корень_2' DECLARATION
- ;ASSIGN
+;VAR 'корень_2' DECLARATION
+;ASSIGN
 ;DIV
 ;ADD
 ;MULT

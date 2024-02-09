@@ -86,7 +86,10 @@ static const char *FindKeyword(KeyCode_t code)
 //==============================================================================
 
 #define FRONT_PRINT(...)    fprintf(output_file, __VA_ARGS__)
+
 #define PRINT_END_OF_LINE() fprintf(output_file, "%s\n", FindKeyword(kEndOfLine));
+
+#define PRINT_KWD(code) fprintf(output_file, "%s\n", FindKeyword(code))
 
 //==============================================================================
 
@@ -98,6 +101,8 @@ static TreeErrs_t PrintExternalDeclarations(TreeNode      *node,
 
     while (decl_node != nullptr)
     {
+    printf("HUY %d\n", __LINE__);
+
         PrintDeclaration(decl_node->left, l_elems, output_file);
 
         FRONT_PRINT("\n");
@@ -142,6 +147,7 @@ static TreeErrs_t PrintVarDeclaration(TreeNode      *node,
 
     PrintNode(node->right, l_elems, output_file);
 
+
     return kTreeSuccess;
 }
 
@@ -156,7 +162,10 @@ static TreeErrs_t PrintFuncDefinition(TreeNode      *node,
 
     TreeNode *params_node = node->right;
 
+
     PrintDefParams(params_node->left, l_elems, output_file);
+
+    printf("HUY %d\n", __LINE__);
 
     FRONT_PRINT("%s\n", FindKeyword(kLeftZoneBracket));
 
@@ -177,20 +186,23 @@ static TreeErrs_t PrintDefParams(TreeNode      *node,
 
     TreeNode *params_node = node;
 
-    if (params_node->left != nullptr)
+    if (params_node != nullptr)
     {
-        PrintDeclaration(params_node->left, l_elems, output_file);
-    }
-
-    params_node = params_node->right;
-
-    while (params_node != nullptr)
-    {
-        FRONT_PRINT("%s ", FindKeyword(kEnumOp));
-
-        PrintDeclaration(params_node->left, l_elems, output_file);
+        if (params_node->left != nullptr)
+        {
+            PrintDeclaration(params_node->left, l_elems, output_file);
+        }
 
         params_node = params_node->right;
+
+        while (params_node != nullptr)
+        {
+            FRONT_PRINT("%s ", FindKeyword(kEnumOp));
+
+            PrintDeclaration(params_node->left, l_elems, output_file);
+
+            params_node = params_node->right;
+        }
     }
 
     FRONT_PRINT("%s\n", FindKeyword(kRightBracket));
@@ -209,16 +221,6 @@ static TreeErrs_t PrintInstructions(TreeNode      *node,
     while (instruction_node != nullptr)
     {
         PrintNode(instruction_node->left, l_elems, output_file);
-
-        if ((instruction_node->left->type == kOperator &&
-             instruction_node->left->data.key_word_code != kIf) ||
-            (instruction_node->left->type == kCall)     ||
-            (instruction_node->left->type == kVarDecl))
-        {
-            FRONT_PRINT("%s", FindKeyword(kEndOfLine));
-        }
-
-        FRONT_PRINT("\n");
 
         instruction_node = instruction_node->right;
     }
@@ -325,12 +327,7 @@ static TreeErrs_t PrintOperator(TreeNode      *node,
         case kFloor:
         case kDiff:
         case kSqrt:
-        case kReturn:
-        case kContinue:
-        case kBreak:
-        case kPrint:
         case kScan:
-        case kAbort:
         {
             FRONT_PRINT("%s %s ", FindKeyword(node->data.key_word_code),
                                   FindKeyword(kLeftBracket));
@@ -338,6 +335,26 @@ static TreeErrs_t PrintOperator(TreeNode      *node,
             PrintNode(node->right, l_elems, output_file);
 
             FRONT_PRINT("%s ", FindKeyword(kRightBracket));
+
+            break;
+        }
+
+        case kReturn:
+        case kContinue:
+        case kAbort:
+        case kBreak:
+        case kPrint:
+        {
+            FRONT_PRINT("%s %s ", FindKeyword(node->data.key_word_code),
+                                  FindKeyword(kLeftBracket));
+
+            PrintNode(node->right, l_elems, output_file);
+
+            FRONT_PRINT("%s ", FindKeyword(kRightBracket));
+
+            PRINT_KWD(kEndOfLine);
+
+            FRONT_PRINT("\n");
 
             break;
         }
@@ -352,7 +369,7 @@ static TreeErrs_t PrintOperator(TreeNode      *node,
 
             PrintInstructions(node->right, l_elems, output_file);
 
-            FRONT_PRINT("%s", FindKeyword(kRightZoneBracket));
+            FRONT_PRINT("%s\n", FindKeyword(kRightZoneBracket));
 
             break;
         }
@@ -367,7 +384,7 @@ static TreeErrs_t PrintOperator(TreeNode      *node,
 
             PrintInstructions(node->right, l_elems, output_file);
 
-            FRONT_PRINT("%s", FindKeyword(kRightZoneBracket));
+            FRONT_PRINT("%s\n", FindKeyword(kRightZoneBracket));
 
             break;
         }
@@ -379,6 +396,19 @@ static TreeErrs_t PrintOperator(TreeNode      *node,
             FRONT_PRINT("%s ", FindKeyword(kAssign));
 
             PrintNode(node->left, l_elems, output_file);
+
+            PRINT_KWD(kEndOfLine);
+
+            FRONT_PRINT("\n");
+
+            break;
+        }
+
+        case kEndOfLine:
+        {
+            PrintNode(node->left, l_elems, output_file);
+
+            PrintNode(node->right, l_elems, output_file);
 
             break;
         }

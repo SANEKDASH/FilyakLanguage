@@ -19,6 +19,10 @@ static bool IsType         (KeyCode_t keyword_code);
 static bool IsFunc         (KeyCode_t keyword_code);
 static bool IsCycleKeyWord (KeyCode_t keyword_code);
 
+TreeNode *GetDiff(Identificators *vars,
+                  Stack          *stk,
+                  size_t         *iter);
+
 static TreeNode *GetDeclaration(Identificators   *vars,
                                 Stack            *stk,
                                 NameTables       *tables,
@@ -125,6 +129,8 @@ TreeNode *GetSyntaxTree(Identificators  *vars,
 }
 
 //==============================================================================
+    #undef DEBUG
+
     #define GO_TO_NEXT_TOKEN ++*iter
 
     #define OP_CTOR(op_code) NodeCtor(nullptr, nullptr, nullptr, kOperator, op_code)
@@ -231,6 +237,11 @@ static TreeNode *GetExternalDecl(Identificators *vars,
 
     cur_unit->left = GetDeclaration(vars, stk, tables, cur_table, iter);
 
+    if (cur_unit->left == nullptr)
+    {
+        return nullptr;
+    }
+
     if(cur_unit->left->type == kFuncDef)
     {
         AddName(cur_table, cur_unit->left->data.variable_pos, kFunc);
@@ -239,16 +250,17 @@ DPR
     while (*iter < stk->stack_data.size - 1)
     {
 DPR
-
         cur_unit->right = OP_CTOR(kEndOfLine);
 DPR
-
         cur_unit = cur_unit->right;
 DPR
-
         cur_unit->left = GetDeclaration(vars, stk, tables, cur_table, iter);
 DPR
-        printf("%p CUR_UNIT_PTR<-\n", cur_unit->left);
+        if (cur_unit->left == nullptr)
+        {
+            return nullptr;
+        }
+
         if (cur_unit->left->type == kFuncDef)
         {
             AddName(cur_table, cur_unit->left->data.variable_pos, kFunc);
@@ -362,6 +374,11 @@ DPR
     params->left  = GetDeclarationList(vars, stk, tables, cur_table, iter);
 DPR
     params->right = GetInstructionList(vars, stk, tables, cur_table, iter);
+
+    if (params->right == nullptr)
+    {
+        return nullptr;
+    }
 DPR
     decl->right = params;
 
@@ -485,6 +502,7 @@ TreeNode *GetExpression(Identificators *vars,
         }
         else
         {
+        DPR
             return GetPrimaryExpression(vars, stk, iter);
         }
     }
@@ -542,8 +560,14 @@ TreeNode *GetPrimaryExpression(Identificators *vars,
 
     if (CUR_NODE_TYPE == kOperator)
     {
-        if (IsUnaryOp(CUR_NODE_DATA))
+
+        if (IsFunc(CUR_NODE_DATA))
         {
+            if (CUR_NODE_DATA == kDiff)
+            {
+                return GetDiff(vars, stk, iter);
+            }
+
             TreeNode *un_func = CUR_NODE;
 
             GO_TO_NEXT_TOKEN;
@@ -563,6 +587,41 @@ TreeNode *GetPrimaryExpression(Identificators *vars,
     {
         return GetIdentificator(vars, stk, iter);
     }
+}
+
+//==============================================================================
+
+TreeNode *GetDiff(Identificators *vars,
+                  Stack          *stk,
+                  size_t         *iter)
+{
+    CHECK(vars);
+    CHECK(stk);
+    CHECK(iter);
+
+    TreeNode *diff_tree = CUR_NODE;
+
+    GO_TO_NEXT_TOKEN;
+
+    SYNTAX_OP_ASSERT(kLeftBracket);
+
+    TreeNode *params_node = OP_CTOR(kEnumOp);
+
+    GO_TO_NEXT_TOKEN;
+
+    TreeNode *param = params_node;
+
+    diff_tree->left = GetAddExpression(vars, stk, iter);
+DPR
+    GO_TO_NEXT_TOKEN;
+
+    diff_tree->right = GetAddExpression(vars, stk, iter);
+
+    SYNTAX_OP_ASSERT(kRightBracket);
+
+    GO_TO_NEXT_TOKEN;
+
+    return diff_tree;
 }
 
 //==============================================================================
@@ -601,21 +660,16 @@ DPR
 
         GO_TO_NEXT_TOKEN;
 DPR
-
         TreeNode *node_rhs = GetMultExpression(vars, stk, iter);
 DPR
-
         op->left  = node_lhs;
 DPR
         op->right = node_rhs;
 DPR
-
         node_lhs = op;
 DPR
-
     }
 DPR
-
     return node_lhs;
 }
 
@@ -678,7 +732,7 @@ DPR
 
         GO_TO_NEXT_TOKEN;
 DPR
-        func->right = GetExpression(vars, stk, iter);
+        func->right = GetAddExpression(vars, stk, iter);
 DPR
         return func;
     }
@@ -785,6 +839,10 @@ DPR
 DPR
         cur_instruction->left = GetInstruction(vars, stk, tables, cur_table, iter);
 DPR
+        if (cur_instruction->left == nullptr)
+        {
+            return nullptr;
+        }
     }
 DPR
     GO_TO_NEXT_TOKEN;
@@ -856,6 +914,11 @@ DPR
     {
         return GetCycleInstruction(vars, stk, tables, cur_table, iter);
     }
+    else
+    {
+        printf(">>ÑÒÐÎÊÀ: %d\n"
+               "  ÅÁËÀÍ, ÎÆÈÄÀËÀÑÜ ÈÍÑÒÐÓÊÖÈß. À ÿ óâèäåë\n", CUR_LINE);
+    }
 DPR
 
     return nullptr;
@@ -911,6 +974,11 @@ static TreeNode *GetChoiceInstruction(Identificators *vars,
     choice_node->left  = GetCondition(vars, stk, iter);
 
     choice_node->right = GetInstructionList(vars, stk, tables, cur_table, iter);
+
+    if (choice_node->right == nullptr)
+    {
+        return nullptr;
+    }
 
     return choice_node;
 }

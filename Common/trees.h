@@ -58,7 +58,7 @@ struct NameTables
 
 struct Identificator
 {
-    const char *id = nullptr;
+    char *id =  nullptr;
     bool        declaration_state;
     IdType_t    id_type;
 };
@@ -148,7 +148,7 @@ int AddName(TableOfNames *table,
 int VarArrayDtor(Identificators *vars);
 
 int AddVar(Identificators *vars,
-           const char     *var_name);
+           char           *var_name);
 
 int SeekVariable(Identificators *vars,
                  const char     *var_name);

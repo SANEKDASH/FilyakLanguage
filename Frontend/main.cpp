@@ -28,7 +28,8 @@ int main(int argc, char *argv[])
 
     EndTreeGraphDump();
 
-    if (PrintTreeInFile(&l_elems, "tree_save.txt") != kTreeSuccess)
+    if (PrintTreeInFile(&l_elems, "tree_save.txt") != kTreeSuccess ||
+        l_elems.syntax_tree.root == nullptr)
     {
         printf(">>Я не буду компилить, долбооеоооб.\n");
 

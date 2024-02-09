@@ -1,0 +1,9 @@
+all:
+	make -f MakeFrontend
+	make -f MakeBackend
+	make -f MakeReverseFrontend
+clean:
+	make -f MakeFrontend clean
+	make -f MakeBackend clean
+	make -f MakeReverseFrontend clean
+	

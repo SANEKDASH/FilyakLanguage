@@ -245,7 +245,7 @@ int SeekVariable(Identificators *vars, const char *var_name)
 
 //==============================================================================
 
-int AddVar(Identificators *vars, const char *var_name)
+int AddVar(Identificators *vars, char *var_name)
 {
     if (vars->var_count >= vars->size)
     {
@@ -549,7 +549,7 @@ TreeErrs_t PrintTreeInFile(LanguageElems *l_elems,
     if (main_id == kPoisonVal)
     {
         printf("У любого уважающего себя кери в программе должен быть 'аганим'.\n"
-               "У тебя его нет, бездарь...");
+               "У тебя его нет, бездарь...\n");
 
         fclose(output_file);
 
@@ -598,6 +598,10 @@ TreeErrs_t ReadLanguageElemsOutOfFile(LanguageElems *l_elems,
 
         return kFailedToReadTree;
     }
+
+    free(l_elems->vars.var_array[l_elems->tables.main_id_pos].id);
+
+    l_elems->vars.var_array[l_elems->tables.main_id_pos].id = strdup(kMainFuncName);
 
     ReadNameTablesOutOfFile(l_elems, tables_file_name);
 

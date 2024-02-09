@@ -2,7 +2,7 @@
 
 #include "backend.h"
 
-static const char *main_func_name = "Ð°Ð³Ð°Ð½Ð¸Ð¼";
+static const char *main_func_name = "àãàíèì";
 
 static TreeErrs_t AssembleOp(const TreeNode      *node,
                              const LanguageElems *l_elems,
@@ -67,7 +67,8 @@ TreeErrs_t MakeAsmCode(LanguageElems *l_elems,
         return kFailedToOpenFile;
     }
 
-    fprintf(output_file, "jmp %s\n", main_func_name);
+    fprintf(output_file, "call %s\n"
+                         "hlt\n", l_elems->vars.var_array[l_elems->tables.main_id_pos].id);
 
     TreeNode *curr_op = l_elems->syntax_tree.root;
 
@@ -144,14 +145,7 @@ static TreeErrs_t AssembleFuncDef(const TreeNode      *node,
         cur_instruction = cur_instruction->right;
     }
 
-    if (func->data.variable_pos == l_elems->tables.main_id_pos)
-    {
-        ASM_PRINT("hlt\n");
-    }
-    else
-    {
-        ASM_PRINT("ret\n");
-    }
+    ASM_PRINT("ret\n");
 
     return kTreeSuccess;
 }
@@ -200,7 +194,7 @@ static TreeErrs_t AssembleOp(const TreeNode      *node,
         {
             if (node->right != nullptr)
             {
-                ASM_PRINT("\t\t;VAR '%s' DECLARATION\n ",
+                ASM_PRINT(";VAR '%s' DECLARATION\n",
                           l_elems->vars.var_array[node->data.variable_pos].id);
 
                 if (node->right->type == kOperator && node->right->data.key_word_code == kAssign)
@@ -306,8 +300,11 @@ static TreeErrs_t AsmOperator(const TreeNode      *node,
 
             ASM_PRINT("\tjbe end_if_%d\n", if_count);
 
+            size_t cur_if_count = if_count;
 
             TreeNode *cur_op = node->right;
+
+            ++if_count;
 
             while (cur_op != nullptr)
             {
@@ -316,9 +313,7 @@ static TreeErrs_t AsmOperator(const TreeNode      *node,
                 cur_op = cur_op->right;
             }
 
-            ASM_PRINT("end_if_%d:\n", if_count++);
-
-            ++if_count;
+            ASM_PRINT("end_if_%d:\n", cur_if_count);
 
             return kTreeSuccess;
 
@@ -365,6 +360,14 @@ static TreeErrs_t AsmOperator(const TreeNode      *node,
             break;
         }
 
+        case kEndOfLine:
+        {
+            ASM_NODE(node->left);
+            ASM_NODE(node->right);
+
+            break;
+        }
+
         case kScan:
         {
             ASM_PRINT("\tin\n");
@@ -372,9 +375,10 @@ static TreeErrs_t AsmOperator(const TreeNode      *node,
             break;
         }
 
-        #define ASM_CMD(const, static_var_name, jmp_str, label_str, ...)            \
+        #define ASM_CMD(const, static_var_name, jmp_str, label_str, str, ...)       \
             case const:                                                             \
             {                                                                       \
+                ASM_PRINT(";LOGICAL_OP %s\n", str);                                   \
                 static size_t static_var_name = 0;                                  \
                                                                                     \
                 ASM_PRINT("\tpush 0\n");                                            \
@@ -388,10 +392,10 @@ static TreeErrs_t AsmOperator(const TreeNode      *node,
                           "%s_%d:\n"                                                \
                           "\tpush 1\n"                                              \
                           "logical_op_end_%d:\n", jmp_str, label_str,               \
-                                                    static_var_name,                \
-                                                    logical_op_count,               \
-                                                    label_str, static_var_name,     \
-                                                    logical_op_count);              \
+                                                  static_var_name,                  \
+                                                  logical_op_count,                 \
+                                                  label_str, static_var_name,       \
+                                                  logical_op_count);                \
                 ++logical_op_count;                                                 \
                 ++static_var_name;                                                  \
                                                                                     \
@@ -485,9 +489,11 @@ static TreeErrs_t AsmOperator(const TreeNode      *node,
             break;
         }
 
+
+
         default:
         {
-            printf("AssembleOperator() KAVO TYPE : %d, OP_CODE : %d\n, node_pointer: %p", node->type,
+            printf("AssembleOperator() KAVO TYPE : %d, OP_CODE : %d, node_pointer: %p\n", node->type,
                                                                                           node->data.key_word_code,
                                                                                           node);
 
